@@ -70,7 +70,12 @@ class Panel:
 
     @property
     def nominal(self) -> tuple[RGB, ...]:
-        return tuple(NOMINAL[ink] for ink in self.inks)
+        return nominal_measured(self.palette)
+
+    @property
+    def ink_hex(self) -> dict[str, str]:
+        """CSS color per available ink, e.g. {"black": "#000000", ...}."""
+        return {ink: "#{:02x}{:02x}{:02x}".format(*NOMINAL[ink]) for ink in self.inks}
 
     @property
     def size(self) -> tuple[int, int]:

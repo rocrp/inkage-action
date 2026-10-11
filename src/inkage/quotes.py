@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
-from inkage.panel import NOMINAL, Panel
+from inkage.panel import Panel
 from inkage.source import Context, Source
 
 TENCENT_URL = "https://qt.gtimg.cn/q={code}"
@@ -72,7 +72,8 @@ def parse_tencent(text: str, market: Market) -> Quote:
         raise QuoteError(f"Tencent {code}: missing or malformed field ({e})") from None
 
 
-def check_fresh(quote: Quote, now: datetime, max_age: timedelta) -> None:
+def check_quote(quote: Quote, now: datetime, max_age: timedelta) -> None:
+    """Raise unless the quote is fresh enough and has a positive price."""
     if now - quote.time > max_age:
         raise QuoteError(f"{quote.code}: quote from {quote.time.isoformat()} is older than {max_age}")
     if quote.price <= 0:
@@ -86,10 +87,6 @@ async def fetch_tencent(code: str, market: Market) -> Quote:
         return parse_tencent(resp.content.decode("gbk"), market)
 
 
-def _hex(ink: str) -> str:
-    return "#{:02x}{:02x}{:02x}".format(*NOMINAL[ink])
-
-
 class QuoteSource(Source):
     """Shared fetch + layout. Subclasses set ``market``, ``code()`` and the color convention."""
 
@@ -97,8 +94,8 @@ class QuoteSource(Source):
     dither = "threshold"
     fields = ("name", "price", "change", "change_pct", "time")
     market: ClassVar[Market]
-    # Ink for rising / falling prices, first available on the Panel wins.
     prev_label: ClassVar[str] = "Prev"
+    # Ink for rising / falling prices, first available on the Panel wins.
     up_inks: ClassVar[tuple[str, ...]]
     down_inks: ClassVar[tuple[str, ...]]
 
@@ -114,7 +111,7 @@ class QuoteSource(Source):
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:
         quote = await fetch_tencent(self.code(ctx), self.market)
-        check_fresh(quote, ctx.now, timedelta(hours=ctx.params["max_age_hours"]))
+        check_quote(quote, ctx.now, timedelta(hours=ctx.params["max_age_hours"]))
         local = quote.time.astimezone(ctx.tz)
         return {
             "name": ctx.params["label"] or self.label(ctx, quote),
@@ -130,9 +127,11 @@ class QuoteSource(Source):
         }
 
     def render(self, ctx: Context, panel: Panel, data: dict[str, Any]) -> str:
-        def pick(inks: tuple[str, ...]) -> str:
-            return _hex(next((i for i in inks if i in panel.inks), "black"))
+        hexes = panel.ink_hex
 
-        colors = {"up": pick(self.up_inks), "down": pick(self.down_inks), "flat": _hex("black")}
+        def pick(inks: tuple[str, ...]) -> str:
+            return hexes[next((i for i in inks if i in panel.inks), "black")]
+
+        colors = {"up": pick(self.up_inks), "down": pick(self.down_inks), "flat": hexes["black"]}
         extra = {"color": colors[data["direction"]], "prev_label": self.prev_label}
         return self.render_template(ctx, panel, {**data, **extra})

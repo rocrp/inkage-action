@@ -39,7 +39,7 @@ runs:
 
     - id: versions
       shell: bash
-      run: echo "playwright=$(grep -A1 '^name = "playwright"$' "$GITHUB_ACTION_PATH/uv.lock" | sed -n 's/^version = "\(.*\)"$/\1/p')" >> "$GITHUB_OUTPUT"
+      run: echo "playwright=$("$GITHUB_ACTION_PATH/scripts/playwright-version.sh" "$GITHUB_ACTION_PATH/uv.lock")" >> "$GITHUB_OUTPUT"
 
     - uses: actions/cache@v4
       with:

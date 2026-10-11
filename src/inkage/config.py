@@ -5,6 +5,7 @@ Every error names the offending key (e.g. ``sources.index.panels[1]``).
 
 import os
 import tomllib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -87,9 +88,16 @@ def _panel(pid: str, raw: dict) -> Panel:
         raise ConfigError(f"{key}: {e}") from None
 
 
-def _source(sid: str, raw: dict, ctx: dict[str, Any]) -> SourceConfig:
+def _source(
+    sid: str,
+    raw: dict,
+    *,
+    registry: dict[str, type[Source]],
+    panels: dict[str, Panel],
+    default_tz: ZoneInfo,
+    env: Mapping[str, str],
+) -> SourceConfig:
     key = f"sources.{sid}"
-    registry, panels, default_tz, env = ctx["registry"], ctx["panels"], ctx["timezone"], ctx["env"]
     name = raw.get("source", sid)
     if (cls := registry.get(name)) is None:
         raise ConfigError(f"{key}: unknown Source {name!r} (known: {', '.join(sorted(registry))})")
@@ -144,9 +152,7 @@ def parse_config(raw: dict, sources_dir: Path | None = None, env: dict[str, str]
     defaults = _table(raw.get("defaults", {}), "defaults")
     _check_keys(defaults, {"timezone"}, "defaults")
     timezone = _zone(defaults.get("timezone", "UTC"), "defaults.timezone")
-    panels = {
-        pid: _panel(pid, _table(p, f"panels.{pid}")) for pid, p in _table(raw.get("panels", {}), "panels").items()
-    }
+    panels = _panels(raw)
     try:
         registry = load_sources(sources_dir)
     except ValueError as e:
@@ -154,19 +160,40 @@ def parse_config(raw: dict, sources_dir: Path | None = None, env: dict[str, str]
     sources = _table(raw.get("sources", {}), "sources")
     if not sources:
         raise ConfigError("sources: no Sources configured")
-    ctx = {"registry": registry, "panels": panels, "timezone": timezone, "env": os.environ if env is None else env}
     return Config(
         timezone=timezone,
         panels=panels,
-        sources=tuple(_source(sid, _table(s, f"sources.{sid}"), ctx) for sid, s in sources.items()),
+        sources=tuple(
+            _source(
+                sid,
+                _table(s, f"sources.{sid}"),
+                registry=registry,
+                panels=panels,
+                default_tz=timezone,
+                env=os.environ if env is None else env,
+            )
+            for sid, s in sources.items()
+        ),
     )
 
 
-def load_config(path: Path, sources_dir: Path | None = None, env: dict[str, str] | None = None) -> Config:
+def _read(path: Path) -> dict[str, Any]:
     try:
-        raw = tomllib.loads(path.read_text())
+        return tomllib.loads(path.read_text())
     except tomllib.TOMLDecodeError as e:
         raise ConfigError(f"{path}: TOML syntax error: {e}") from None
     except OSError as e:
         raise ConfigError(f"{path}: cannot read config: {e}") from None
-    return parse_config(raw, sources_dir=sources_dir, env=env)
+
+
+def _panels(raw: dict[str, Any]) -> dict[str, Panel]:
+    return {pid: _panel(pid, _table(p, f"panels.{pid}")) for pid, p in _table(raw.get("panels", {}), "panels").items()}
+
+
+def load_panels(path: Path) -> dict[str, Panel]:
+    """Only the [panels] table of a config, validated."""
+    return _panels(_read(path))
+
+
+def load_config(path: Path, sources_dir: Path | None = None, env: dict[str, str] | None = None) -> Config:
+    return parse_config(_read(path), sources_dir=sources_dir, env=env)

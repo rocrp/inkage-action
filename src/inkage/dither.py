@@ -99,7 +99,7 @@ def dither(img: Image.Image, colors: tuple[RGB, ...], spec: Dither) -> np.ndarra
         h, w = rgb.shape[:2]
         t = (np.tile(m, (h // n + 1, w // n + 1))[:h, :w] + 0.5) / (n * n) - 0.5
         return _nearest_array(np.clip(rgb - t[..., None] * 255.0 * spec.strength, 0, 255), pal, spec.distance)
-    if spec.method == "threshold" or spec.strength == 0:
+    if spec.method == "threshold":
         return _nearest_array(rgb, pal, spec.distance)
     return _diffuse(rgb, pal, KERNELS[spec.method], spec)
 

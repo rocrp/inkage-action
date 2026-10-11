@@ -8,6 +8,7 @@ whole byte.
 
 import struct
 from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
 from PIL import Image
@@ -32,7 +33,10 @@ def encode_pcim(frame: Image.Image, ink_count: int) -> bytes:
     return PCIM_HEADER.pack(PCIM_MAGIC, PCIM_VERSION, 4, ink_count, 0, w, h, len(payload)) + payload
 
 
-# Encoder name -> (file extension, encode(frame, ink_count) -> bytes)
-ENCODERS: dict[str, tuple[str, Callable[[Image.Image, int], bytes]]] = {
-    "pcim": ("pcim", encode_pcim),
-}
+@dataclass(slots=True, frozen=True)
+class Encoder:
+    ext: str
+    encode: Callable[[Image.Image, int], bytes]  # (frame, ink_count) -> bytes
+
+
+ENCODERS: dict[str, Encoder] = {"pcim": Encoder(ext="pcim", encode=encode_pcim)}

@@ -148,3 +148,42 @@ def test_encoder_outputs_only_where_configured(tmp_path):
     frames = {e["panel"]: e for e in json.loads((tmp_path / "manifest.json").read_bytes())["frames"]}
     assert frames["tag"]["encoders"]["pcim"]["url"] == "https://example.test/site/daily/tag.pcim"
     assert frames["250x122-bw"]["encoders"] == {}
+
+
+def test_unreachable_previous_frame_regenerates_with_fresh_next_due(tmp_path):
+    a, b = tmp_path / "a", tmp_path / "b"
+    do_run(config(), lambda _p: None, a, T0)
+    (a / "daily/250x122-bw.png").unlink()  # previous Site lost one file
+    result = do_run(config(), site_getter(a), b, T1)
+    d = next(d for d in result.decisions if (d.source.id, d.panel.id) == ("daily", "250x122-bw"))
+    assert (d.due, d.reason) == (True, "previous Frame unavailable")
+    entry = result.manifest.by_key()[("daily", "250x122-bw")]
+    assert entry.generated_at == "2026-10-12T00:06:00Z"
+    assert entry.next_due == "2026-10-12T16:05:00Z"  # next 00:05 Shanghai after the new generation
+
+
+def test_manifest_of_other_version_means_full_regenerate(tmp_path):
+    a, b = tmp_path / "a", tmp_path / "b"
+    do_run(config(), lambda _p: None, a, T0)
+    manifest = json.loads((a / "manifest.json").read_bytes())
+    (a / "manifest.json").write_text(json.dumps({**manifest, "version": 0}))
+    result = do_run(config(), site_getter(a), b, T1)
+    assert all(d.due and d.reason == "never generated" for d in result.decisions)
+
+
+def test_adding_an_encoder_regenerates_a_carried_frame(tmp_path):
+    a, b = tmp_path / "a", tmp_path / "b"
+    sh = {"timezone": "Asia/Shanghai"}
+    plain = parse_config({"defaults": sh, "sources": {"daily": {"panels": ["250x122-bwr"]}}}, sources_dir=FIXTURES)
+    do_run(plain, lambda _p: None, a, T0)
+    with_pcim = parse_config(
+        {
+            "defaults": sh,
+            "panels": {"250x122-bwr": {"preset": "250x122-bwr", "encoders": ["pcim"]}},
+            "sources": {"daily": {"panels": ["250x122-bwr"]}},
+        },
+        sources_dir=FIXTURES,
+    )
+    result = do_run(with_pcim, site_getter(a), b, T1)
+    assert result.decisions[0].reason == "encoders changed"
+    assert (b / "daily/250x122-bwr.pcim").is_file()

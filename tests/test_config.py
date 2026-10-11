@@ -42,7 +42,7 @@ def test_cli_validate_exits_nonzero_on_error(tmp_path):
         ),
         (
             "[sources.calendar]\npanels = ['800x480-bwr']\nschedule = { every = '5m', at = ['00:05'] }\n",
-            "sources.calendar.schedule",
+            "sources.calendar.schedule: 'every' and 'at' are mutually exclusive",
         ),
         ("[sources.calendar]\npanels = ['800x480-bwr']\nschedule = { at = ['25:00'] }\n", "sources.calendar.schedule"),
         ("[sources.calendar]\npanels = ['800x480-bwr']\ncolour = 'red'\n", "sources.calendar"),

@@ -86,7 +86,7 @@ def test_preview_is_frame_in_nominal_colors():
     idx = np.asarray(frame)
     rgb = np.asarray(preview(frame))
     assert rgb.shape == (122, 250, 3)
-    for i, color in enumerate(panel.nominal):
+    for i, color in enumerate([(0, 0, 0), (255, 255, 255), (255, 0, 0)]):  # BWR inks per CONTEXT.md
         assert (rgb[idx == i] == color).all()
 
 

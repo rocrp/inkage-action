@@ -17,7 +17,7 @@ from types import TracebackType
 from PIL import Image
 from playwright.async_api import Browser, Playwright, async_playwright
 
-FONT_SUFFIXES = (".ttf", ".otf", ".woff", ".woff2", ".ttc")
+FONT_SUFFIXES = (".ttf", ".otf", ".woff", ".woff2")
 _HEAD = re.compile(r"<head(\s[^>]*)?>", re.IGNORECASE)
 _BASE_CSS = "html,body{margin:0;padding:0;overflow:hidden}*{-webkit-font-smoothing:none}"
 

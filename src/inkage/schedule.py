@@ -8,8 +8,8 @@ Two forms (mutually exclusive):
 - ``at``: a list of local times; due on the first Run after a listed time since
   the last generation.
 
-All comparisons allow ``TOLERANCE`` of slack so a cron tick arriving slightly
-early never pushes a regeneration back a whole tick.
+All comparisons allow ``TOLERANCE`` of slack so cron jitter (late or early
+ticks) never pushes a regeneration back a whole tick.
 """
 
 from __future__ import annotations
@@ -19,7 +19,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-TOLERANCE = timedelta(minutes=1)
+# One cron tick (5 min) minus a minute: a late Run followed by an on-time one
+# never skips a cycle, yet two Runs a minute apart don't both regenerate.
+TOLERANCE = timedelta(minutes=4)
 # next_due search horizon; longer intervals are rejected at parse time.
 HORIZON = timedelta(days=8)
 
@@ -113,7 +115,9 @@ class Schedule:
         if (w := raw.get("window")) is not None:
             if not isinstance(w, dict) or set(w) - {"time", "days"} or "time" not in w:
                 raise ScheduleError(f"window must be {{ time = 'HH:MM-HH:MM', days = 'mon-fri' }}, got {w!r}")
-            window = Window.parse(w["time"], w.get("days", "mon-sun"))
+            if not isinstance(days := w.get("days", "mon-sun"), str):
+                raise ScheduleError(f"window days must be a string like 'mon-fri', got {days!r}")
+            window = Window.parse(w["time"], days)
         at = raw.get("at", [])
         if not isinstance(at, list) or ("at" in raw and not at):
             raise ScheduleError(f"'at' must be a non-empty list of 'HH:MM', got {at!r}")

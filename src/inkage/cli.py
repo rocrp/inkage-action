@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
@@ -13,14 +15,13 @@ import typer
 from loguru import logger
 from PIL import Image
 
-from inkage.config import Config, ConfigError, SourceConfig, load_config
+from inkage.config import Config, ConfigError, SourceConfig, load_config, load_panels, parse_config
 from inkage.dither import Dither
 from inkage.frame import Framing, make_frame, png_bytes, preview
 from inkage.panel import PRESETS
 from inkage.render import Renderer
 from inkage.run import RunResult, context_for, frame_from_data, plan, run
 from inkage.site import Manifest, http_getter, iso
-from inkage.source import load_sources
 
 # Exit code when a Source failed at runtime but the Site was still written (config errors exit 2).
 SOURCE_FAILED = 3
@@ -42,12 +43,19 @@ def _now(text: str | None) -> datetime:
     return t
 
 
-def _load(config: Path, sources_dir: Path | None) -> Config:
+@contextmanager
+def _config_errors() -> Iterator[None]:
+    """Config errors exit 2 with the message naming the offending key."""
     try:
-        return load_config(config, sources_dir=sources_dir)
+        yield
     except ConfigError as e:
         typer.echo(f"config error: {e}", err=True)
         raise typer.Exit(2) from None
+
+
+def _load(config: Path, sources_dir: Path | None) -> Config:
+    with _config_errors():
+        return load_config(config, sources_dir=sources_dir)
 
 
 @app.command()
@@ -80,18 +88,20 @@ def plan_cmd(
 @app.command()
 def convert(
     image: Annotated[Path, typer.Argument()],
-    panel: Annotated[str, typer.Option(help="Preset id")],
+    panel: Annotated[str, typer.Option(help="Preset id, or a [panels] id from --config")],
     dither: Annotated[str, typer.Option(help="Dither method")] = "floyd-steinberg",
-    framing: Annotated[str, typer.Option(help="fill (crop) or fit (letterbox)")] = "fill",
+    framing: Annotated[Framing, typer.Option(help="fill (crop) or fit (letterbox)")] = "fill",
+    config: Annotated[Path | None, typer.Option("--config", "-c", help="inkage.toml defining Panels")] = None,
     out_dir: Annotated[Path, typer.Option()] = Path("."),
 ) -> None:
     """Convert an RGB image into a Frame (indexed PNG) plus Preview."""
-    if (p := PRESETS.get(panel)) is None:
-        raise typer.BadParameter(f"unknown Preset {panel!r} (known: {', '.join(PRESETS)})")
-    if framing not in ("fill", "fit"):
-        raise typer.BadParameter(f"framing must be fill or fit, got {framing!r}")
-    fr: Framing = "fill" if framing == "fill" else "fit"
-    frame = make_frame(Image.open(image), p, Dither.parse(dither), fr)
+    panels = dict(PRESETS)
+    if config is not None:
+        with _config_errors():
+            panels |= load_panels(config)
+    if (p := panels.get(panel)) is None:
+        raise typer.BadParameter(f"unknown Panel {panel!r} (known: {', '.join(panels)})")
+    frame = make_frame(Image.open(image), p, Dither.parse(dither), framing)
     _write(out_dir, f"{image.stem}.{p.id}", frame)
 
 
@@ -106,17 +116,9 @@ def render(
     now: NowOpt = None,
 ) -> None:
     """Render one Source for one Preset with its default settings."""
-    from inkage.config import parse_config
-
-    registry = load_sources(sources_dir)
-    if source not in registry:
-        raise typer.BadParameter(f"unknown Source {source!r} (known: {', '.join(sorted(registry))})")
     raw = {"defaults": {"timezone": timezone}, "sources": {source: {"panels": [panel]}}}
-    try:
+    with _config_errors():
         sc = parse_config(raw, sources_dir=sources_dir).sources[0]
-    except ConfigError as e:
-        typer.echo(f"config error: {e}", err=True)
-        raise typer.Exit(2) from None
     frame = asyncio.run(_render_one(sc, _now(now), fonts_dir))
     _write(out_dir, f"{source}.{panel}", frame)
 
@@ -157,8 +159,9 @@ def run_cmd(
 
 def _summary(result: RunResult) -> None:
     lines = ["| Source | Panel | Status | Generated | Next due |", "|---|---|---|---|---|"]
+    entries = result.manifest.by_key()
     for d in result.decisions:
-        e = next(x for x in result.manifest.frames if x.key == (d.source.id, d.panel.id))
+        e = entries[(d.source.id, d.panel.id)]
         status = f"❌ {e.error}" if e.error else ("regenerated" if d.due else "carried over")
         lines.append(f"| {e.source} | {e.panel} | {status} | {e.generated_at or '—'} | {e.next_due or '—'} |")
     text = "\n".join(lines) + "\n"

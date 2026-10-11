@@ -78,7 +78,7 @@ Put each Source in `sources/<name>/` and pass `sources_dir: sources`. Names must
 
 Template context: `data` (from `fetch`), `now` (local datetime), `params`, `panel` (`id`, `width`, `height`, `palette`, `inks`) and `ink` (CSS hex per available ink, e.g. `{{ ink.red }}`). Use `{% if 'red' in panel.inks %}` to adapt to the palette. Pages render in headless Chromium at the Panel's exact size; text is drawn without antialiasing.
 
-**Fonts**: files in `fonts/` (`.ttf .otf .woff .woff2 .ttc`) become `@font-face` families named after the file stem: `fonts/Pixel.ttf` → `font-family: "Pixel"`. Noto Sans CJK SC is installed on the runner.
+**Fonts**: files in `fonts/` (`.ttf .otf .woff .woff2`) become `@font-face` families named after the file stem: `fonts/Pixel.ttf` → `font-family: "Pixel"`. Noto Sans CJK SC is installed on the runner.
 
 **Secrets**: map repository secrets to environment variables in your own workflow when you need them; a Source's `requires_secrets` must all be set or validation fails. With the reusable workflow, call the action directly in your own job (steps: checkout, `actions/configure-pages`, `rocrp/inkage-action@v1` with `env:` secrets, `upload-pages-artifact`, `deploy-pages`) since reusable workflows do not forward arbitrary env.
 
@@ -107,7 +107,7 @@ schedule = { every = "5m", window = { time = "09:30-15:00", days = "mon-fri" }, 
 dither = { method = "atkinson", serpentine = true, strength = 0.8, distance = "ycbcr" }
 ```
 
-- **Schedule**: `every` (+ optional `window` and `fallback`; no fallback = no refresh outside the window) or `at = ["00:05", "12:00"]`, never both. A window crossing midnight belongs to the weekday it starts on. One minute of tolerance absorbs cron jitter.
+- **Schedule**: `every` (+ optional `window` and `fallback`; no fallback = no refresh outside the window) or `at = ["00:05", "12:00"]`, never both. A window crossing midnight belongs to the weekday it starts on. Four minutes of tolerance (one 5-minute tick minus a minute) absorb cron jitter: a late Run followed by an on-time one never skips a cycle.
 - **Presets**: `{250x122,296x128,400x300,648x480,800x480}-{bw,bwr,bwry}`, `800x480-spectra6`, `400x600-spectra6`.
 - **Dither**: `threshold` (nearest color, default for UI), `floyd-steinberg`, `atkinson`, `stucki`, `jjn`, `burkes`, `sierra`, `bayer4`, `bayer8`; options `serpentine`, `strength` (0–2), `distance` (`rgb` | `ycbcr`).
 

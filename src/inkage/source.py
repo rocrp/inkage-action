@@ -18,7 +18,7 @@ import jinja2
 from PIL import Image
 
 from inkage.dither import Dither
-from inkage.panel import NOMINAL, Panel
+from inkage.panel import Panel
 from inkage.schedule import Schedule
 
 BUILTIN_DIR = Path(__file__).parent / "sources"
@@ -81,7 +81,7 @@ class Source:
             now=ctx.local_now,
             params=ctx.params,
             panel=panel,
-            ink={name: "#{:02x}{:02x}{:02x}".format(*NOMINAL[name]) for name in panel.inks},
+            ink=panel.ink_hex,
         )
 
     @classmethod

@@ -41,7 +41,8 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
 1. Load `inkage.toml`; validate fully (unknown Preset, unsupported size, missing secret, bad schedule) → **fail before touching anything**.
 2. Fetch previous `manifest.json` + Frames from `site_url`. Missing/unreachable → treat as empty (full regenerate).
 3. For each configured (Source, Panel): due?
-   - `every`: `now - generated_at >= every - 1m` (inside window), else `fallback`.
+   - `every`: `now - generated_at >= every - 4m` (inside window), else `fallback`. 4m = one tick minus a minute: a late Run then an on-time one still regenerates; Runs a minute apart don't both.
+   - Previous Manifest of another schema `version`, a missing carried file, or a Panel whose `encoders` changed → regenerate that Frame.
    - `at`: first Run after a listed local time since last generation.
 4. Due → `fetch()` → `render()` → dither → indexed PNG + Sidecar + Preview + configured Encoders. Runtime failure → keep previous Frame, record `error` in Manifest entry.
 5. Not due → copy previous Frame + Sidecar unchanged.

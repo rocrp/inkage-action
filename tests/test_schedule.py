@@ -19,6 +19,7 @@ NY = ZoneInfo("America/New_York")
 MARKET = Schedule.parse({"every": "5m", "window": {"time": "09:30-15:00", "days": "mon-fri"}, "fallback": "6h"})
 NIGHT = Schedule.parse({"every": "10m", "window": {"time": "22:00-02:00", "days": "fri"}})
 AT = Schedule.parse({"at": ["00:05", "12:00"]})
+HOURLY = Schedule.parse({"every": "1h"})
 NYSE = Schedule.parse({"every": "5m", "window": {"time": "09:30-16:00", "days": "mon-fri"}, "fallback": "12h"})
 
 
@@ -33,8 +34,12 @@ def utc(text: str) -> datetime:
 # (name, schedule, tz, now, last generated, expected due)
 TRUTH = [
     ("in window, interval elapsed", MARKET, SH, sh("2026-10-12 10:00"), sh("2026-10-12 09:55"), True),
-    ("tolerance: 4m00s of 5m counts", MARKET, SH, sh("2026-10-12 10:00:00"), sh("2026-10-12 09:56:00"), True),
-    ("tolerance: 3m59s of 5m does not", MARKET, SH, sh("2026-10-12 10:00:00"), sh("2026-10-12 09:56:01"), False),
+    # Tolerance is 4 min (one 5-min tick minus a minute): a Run at :09 (late) then :12 (on time) still regenerates.
+    ("tolerance: late tick then on-time tick", MARKET, SH, sh("2026-10-12 10:12"), sh("2026-10-12 10:09"), True),
+    ("tolerance: 1m00s of 5m counts", MARKET, SH, sh("2026-10-12 10:00:00"), sh("2026-10-12 09:59:00"), True),
+    ("tolerance: 0m59s of 5m does not", MARKET, SH, sh("2026-10-12 10:00:00"), sh("2026-10-12 09:59:01"), False),
+    ("hourly: 55m on the 5-min grid is not due", HOURLY, SH, sh("2026-10-12 01:57"), sh("2026-10-12 01:02"), False),
+    ("hourly: 56m is due", HOURLY, SH, sh("2026-10-12 01:58"), sh("2026-10-12 01:02"), True),
     ("outside window uses fallback", MARKET, SH, sh("2026-10-12 16:00"), sh("2026-10-12 14:58"), False),
     ("fallback elapsed", MARKET, SH, sh("2026-10-12 21:00"), sh("2026-10-12 15:00"), True),
     ("weekend is outside window", MARKET, SH, sh("2026-10-17 10:00"), sh("2026-10-17 09:55"), False),
@@ -46,9 +51,9 @@ TRUTH = [
     ("cross-midnight, before start, no fallback", NIGHT, SH, sh("2026-10-16 21:59"), sh("2026-10-16 20:00"), False),
     ("at across day boundary", AT, SH, sh("2026-10-13 00:06"), sh("2026-10-12 12:00:30"), True),
     ("at, nothing new passed", AT, SH, sh("2026-10-13 00:11"), sh("2026-10-13 00:06"), False),
-    ("at, tolerance just under", AT, SH, sh("2026-10-13 00:04:30"), sh("2026-10-12 23:00"), True),
-    ("at, tolerance just over", AT, SH, sh("2026-10-13 00:03:59"), sh("2026-10-12 23:00"), False),
-    ("at, early run already covered it", AT, SH, sh("2026-10-13 00:09"), sh("2026-10-13 00:04:30"), False),
+    ("at, tolerance just under", AT, SH, sh("2026-10-13 00:01:00"), sh("2026-10-12 23:00"), True),
+    ("at, tolerance just over", AT, SH, sh("2026-10-13 00:00:59"), sh("2026-10-12 23:00"), False),
+    ("at, early run already covered it", AT, SH, sh("2026-10-13 00:09"), sh("2026-10-13 00:01:30"), False),
     ("at, after a gap of days", AT, SH, sh("2026-10-19 10:00"), sh("2026-10-17 13:00"), True),
     # 14:00Z = 10:00 EDT: inside NYSE hours (but 22:00 in Shanghai).
     ("other timezone, inside its window", NYSE, NY, utc("2026-10-12 14:00"), utc("2026-10-12 13:55"), True),
@@ -84,15 +89,22 @@ def test_next_due(schedule, tz, last, expected):
     assert schedule.next_due(last, tz) == expected.astimezone(UTC)
 
 
-def test_next_due_is_due_and_minute_before_is_not():
-    """next_due agrees with is_due: due exactly there, not one tolerance-plus-a-minute earlier."""
+def test_next_due_is_due_and_earlier_is_not():
+    """next_due agrees with is_due: due there, not 5 minutes earlier (beyond the 4-minute tolerance)."""
     last = sh("2026-10-12 14:58")
     nd = MARKET.next_due(last, SH)
     assert MARKET.is_due(nd, last, SH)[0]
-    assert not MARKET.is_due(nd - timedelta(minutes=2), last, SH)[0]
+    assert not MARKET.is_due(nd - timedelta(minutes=5), last, SH)[0]
 
 
-def test_every_and_at_rejected_together():
-    raw = {"sources": {"calendar": {"panels": ["800x480-bwr"], "schedule": {"every": "5m", "at": ["00:05"]}}}}
-    with pytest.raises(ConfigError, match="mutually exclusive"):
+def test_window_days_must_be_text():
+    raw = {
+        "sources": {
+            "calendar": {
+                "panels": ["800x480-bwr"],
+                "schedule": {"every": "5m", "window": {"time": "09:30-15:00", "days": 5}},
+            }
+        }
+    }
+    with pytest.raises(ConfigError, match=r"sources\.calendar\.schedule.*days"):
         parse_config(raw)

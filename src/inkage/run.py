@@ -21,6 +21,7 @@ from inkage.site import (
     Entry,
     Getter,
     Manifest,
+    encoder_path,
     frame_path,
     gallery_html,
     iso,
@@ -61,6 +62,8 @@ def plan(config: Config, previous: Manifest | None, now: datetime) -> list[Decis
         entry = prev.get((sc.id, panel.id))
         last = parse_iso(entry.generated_at) if entry else None
         due, reason = sc.schedule.is_due(now, last, sc.tz)
+        if not due and entry and set(entry.encoders) != set(panel.encoders):
+            due, reason = True, "encoders changed"
         basis = now if due else last
         assert basis is not None
         decisions.append(Decision(sc, panel, due, reason, entry, sc.schedule.next_due(basis, sc.tz)))
@@ -69,7 +72,7 @@ def plan(config: Config, previous: Manifest | None, now: datetime) -> list[Decis
 
 def _files(entry: Entry) -> list[str]:
     s, p = entry.source, entry.panel
-    return [frame_path(s, p), preview_path(s, p), *(frame_path(s, p, ENCODERS[n][0]) for n in entry.encoders)]
+    return [frame_path(s, p), preview_path(s, p), sidecar_path(s, p), *(encoder_path(s, p, n) for n in entry.encoders)]
 
 
 def _sha(data: bytes) -> str:
@@ -81,12 +84,10 @@ def _url(site_url: str, path: str) -> str:
 
 
 async def frame_from_data(
-    renderer: Renderer | None, src: Source, ctx: Context, panel: Panel, sc: SourceConfig, data: dict
+    renderer: Renderer, src: Source, ctx: Context, panel: Panel, sc: SourceConfig, data: dict
 ) -> Image.Image:
     out = src.render(ctx, panel, data)
     if isinstance(out, str):
-        if renderer is None:
-            raise RuntimeError("HTML render requested without a Renderer")
         out = await renderer.html_to_image(
             out, panel.width, panel.height, base_dir=src.template_dir, scale=src.supersample
         )
@@ -128,10 +129,10 @@ async def run(
     for d in decisions:
         if not d.due and d.previous and d.previous.sha256 and carry(d.previous):
             entries[d.previous.key] = d.previous
-            files[sidecar_path(*d.previous.key)] = sidecar_bytes(d.previous)
         else:
             if not d.due:
                 d.due, d.reason = True, "previous Frame unavailable"
+                d.next_due = d.source.schedule.next_due(now, d.source.tz)
             due.append(d)
 
     errors: dict[tuple[str, str], str] = {}
@@ -201,10 +202,9 @@ def _write_frame(
     files[preview_path(s, p)] = png_bytes(preview(frame))
     encoders = {}
     for name in d.panel.encoders:
-        ext, encode = ENCODERS[name]
-        blob = encode(frame, d.panel.ink_count)
-        files[frame_path(s, p, ext)] = blob
-        encoders[name] = {"url": _url(site_url, frame_path(s, p, ext)), "sha256": _sha(blob)}
+        blob = ENCODERS[name].encode(frame, d.panel.ink_count)
+        files[encoder_path(s, p, name)] = blob
+        encoders[name] = {"url": _url(site_url, encoder_path(s, p, name)), "sha256": _sha(blob)}
     entry = Entry(
         source=s,
         panel=p,

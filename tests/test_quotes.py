@@ -11,7 +11,7 @@ import pytest
 
 from inkage import quotes
 from inkage.config import parse_config
-from inkage.quotes import QuoteError, check_fresh, parse_tencent
+from inkage.quotes import QuoteError, check_quote, parse_tencent
 from inkage.render import Renderer
 from inkage.run import context_for, frame_from_data
 
@@ -61,9 +61,9 @@ def test_missing_field_raises():
 
 def test_stale_quote_raises():
     q = parse_tencent(text("tencent_sh000300.txt"), "cn")
-    check_fresh(q, q.time + timedelta(hours=72), timedelta(hours=240))  # weekend: fine
+    check_quote(q, q.time + timedelta(hours=72), timedelta(hours=240))  # weekend: fine
     with pytest.raises(QuoteError, match="older than"):
-        check_fresh(q, q.time + timedelta(hours=241), timedelta(hours=240))
+        check_quote(q, q.time + timedelta(hours=241), timedelta(hours=240))
 
 
 def source_config(source: str, panel: str, **params):

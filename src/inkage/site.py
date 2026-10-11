@@ -10,10 +10,13 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx
+from loguru import logger
 
 from inkage.encoders import ENCODERS
 
 MANIFEST = "manifest.json"
+# Bumped on any Manifest schema change; a previous Site with another version is treated as absent.
+MANIFEST_VERSION = 1
 
 # Fetch one Site-relative path from the previous Site; None when absent/unreachable.
 type Getter = Callable[[str], bytes | None]
@@ -37,6 +40,10 @@ def sidecar_path(source: str, panel: str) -> str:
 
 def preview_path(source: str, panel: str) -> str:
     return frame_path(source, panel, "preview.png")
+
+
+def encoder_path(source: str, panel: str, encoder: str) -> str:
+    return frame_path(source, panel, ENCODERS[encoder].ext)
 
 
 @dataclass(slots=True)
@@ -75,12 +82,20 @@ class Manifest:
         return {e.key: e for e in self.frames}
 
     def to_bytes(self) -> bytes:
-        body = {"generated_at": self.generated_at, "frames": [e.to_json() for e in self.frames]}
+        body = {
+            "version": MANIFEST_VERSION,
+            "generated_at": self.generated_at,
+            "frames": [e.to_json() for e in self.frames],
+        }
         return json.dumps(body, ensure_ascii=False, indent=2).encode() + b"\n"
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> Manifest:
+    def from_bytes(cls, data: bytes) -> Manifest | None:
+        """Parse a Manifest; None (with a warning) when it was written by another schema version."""
         raw = json.loads(data)
+        if raw.get("version") != MANIFEST_VERSION:
+            logger.warning(f"previous Manifest has version {raw.get('version')!r}, expected {MANIFEST_VERSION}")
+            return None
         return cls(generated_at=raw["generated_at"], frames=[Entry.from_json(e) for e in raw["frames"]])
 
 
@@ -95,7 +110,8 @@ def http_getter(site_url: str, timeout: float = 20.0) -> Getter:
     def get(path: str) -> bytes | None:
         try:
             resp = client.get(path, headers={"Cache-Control": "no-cache"})
-        except httpx.TransportError:
+        except httpx.TransportError as e:
+            logger.warning(f"previous Site unreachable for {path}: {e}")
             return None
         if resp.status_code == 404:
             return None
@@ -113,7 +129,7 @@ def gallery_html(manifest: Manifest) -> str:
         img = f'<img src="{html.escape(preview)}" alt="">' if e.sha256 else "<div class=missing>no frame yet</div>"
         links = [f'<a href="{html.escape(frame_path(e.source, e.panel))}">png</a>']
         links += [
-            f'<a href="{html.escape(frame_path(e.source, e.panel, ENCODERS[name][0]))}">{html.escape(name)}</a>'
+            f'<a href="{html.escape(encoder_path(e.source, e.panel, name))}">{html.escape(name)}</a>'
             for name in e.encoders
         ]
         links.append(f'<a href="{html.escape(sidecar_path(e.source, e.panel))}">json</a>')

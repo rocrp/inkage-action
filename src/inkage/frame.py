@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 from inkage.dither import Dither, dither
 from inkage.panel import Panel
 
-type Framing = Literal["fill", "fit"]
+Framing = Literal["fill", "fit"]
 
 
 def frame_to_panel(img: Image.Image, panel: Panel, framing: Framing = "fill") -> Image.Image:

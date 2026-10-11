@@ -57,10 +57,10 @@ def test_bayer_matrices_are_standard():
 
 
 def test_bayer4_half_grey_whitens_cells_below_8():
-    # Grey 128 = 50.2%: a cell turns white when its threshold (M+0.5)/16 is below that, i.e. M <= 7.
+    # Grey 128 = 50.2%: a cell turns white when its threshold (M+0.5)/16 is below that, i.e. matrix value <= 7
+    # in the standard matrix [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].
     out = dither(Image.new("RGB", (4, 4), (128, 128, 128)), BW, Dither("bayer4"))
-    expected = (np.array(ORDERED["bayer4"]) <= 7).astype(int)
-    assert out.tolist() == expected.tolist()
+    assert out.tolist() == [[1, 0, 1, 0], [0, 1, 0, 1], [1, 0, 1, 0], [0, 1, 0, 1]]
 
 
 def asymmetric(w: int = 24, h: int = 16) -> Image.Image:

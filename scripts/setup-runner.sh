@@ -12,7 +12,7 @@ if ! compgen -G "$fonts/*.ttc" >/dev/null; then
   (cd "$tmp" && apt-get download -qq fonts-noto-cjk)
   dpkg -x "$tmp"/fonts-noto-cjk_*.deb "$tmp/x"
   mkdir -p "$fonts"
-  cp "$tmp"/x/usr/share/fonts/opentype/noto/NotoSansCJK-{Regular,Bold,Black}.ttc "$fonts/"
+  cp "$tmp"/x/usr/share/fonts/opentype/noto/NotoSansCJK-{Regular,Bold}.ttc "$fonts/"
   rm -rf "$tmp"
 fi
 
