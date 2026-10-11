@@ -1,0 +1,19 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; display: flex; align-items: center; }
+  .day { width: 104px; text-align: center; font-size: 76px; font-weight: 900; line-height: 1;
+         color: {{ accent if data.weekday >= 5 else ink.black }}; }
+  .info { flex: 1; padding-left: 8px; border-left: 2px solid {{ ink.black }}; }
+  .l1 { font-size: 18px; font-weight: 700; }
+  .l2 { font-size: 20px; margin-top: 4px; }
+  .l3 { font-size: 16px; margin-top: 4px; color: {{ accent }}; font-weight: 700; }
+</style></head><body>
+  <div class="day">{{ data.day }}</div>
+  <div class="info">
+    <div class="l1">{{ data.month }}月 星期{{ data.weekday_zh }}</div>
+    <div class="l2">{{ data.lunar_month }}{{ data.lunar_day }}</div>
+    <div class="l3">{{ data.solar_term or (data.festivals[0] if data.festivals else data.year_ganzhi ~ data.zodiac ~ "年") }}</div>
+  </div>
+</body></html>

@@ -1,0 +1,20 @@
+# Default config for this repo's own Site. Format: README.md "Config".
+[defaults]
+timezone = "Asia/Shanghai"
+
+[panels.800x480-spectra6]
+preset = "800x480-spectra6"
+encoders = ["pcim"]
+
+[sources.calendar]
+panels = ["800x480-bwr", "250x122-bwr", "800x480-spectra6"]
+schedule = { at = ["00:05"] }
+
+# CSI 300, 5 min during Shanghai trading hours (the Source's default Schedule).
+[sources.index]
+symbol = "sh000300"
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.stock]
+symbol = "AAPL"
+panels = ["800x480-spectra6"]

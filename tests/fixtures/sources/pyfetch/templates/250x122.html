@@ -1,0 +1,7 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; background: {{ ink.white }}; }
+  .bar { position: absolute; top: 0; width: 10px; height: 122px; background: {{ ink.black }}; }
+</style></head><body>
+{% for i in data.bars %}<div class="bar" style="left: {{ i * 20 }}px"></div>{% endfor %}
+</body></html>

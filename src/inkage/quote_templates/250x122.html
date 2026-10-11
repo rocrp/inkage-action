@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 6px 10px; }
+  .name { font-size: 18px; font-weight: 900; display: flex; justify-content: space-between; }
+  .price { font-size: 44px; font-weight: 900; line-height: 1.15; }
+  .chg { font-size: 20px; font-weight: 900; color: {{ data.color }}; }
+  .time { font-size: 12px; font-weight: 700; }
+</style></head><body>
+  <div class="name"><span>{{ data.name }}</span><span class="time">{{ data.time }}</span></div>
+  <div class="price">{{ data.price }}</div>
+  <div class="chg">{{ "▲" if data.direction == "up" else ("▼" if data.direction == "down" else "■") }} {{ data.change }} {{ data.change_pct }}</div>
+</body></html>

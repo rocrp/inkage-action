@@ -1,0 +1,44 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; display: flex; }
+  .left { width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+          border-right: 3px solid {{ ink.black }}; }
+  .ym { font-size: 34px; font-weight: 700; }
+  .day { font-size: 200px; font-weight: 900; line-height: 1; color: {{ accent if data.weekday >= 5 else ink.black }}; }
+  .wd { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .lunar { font-size: 34px; margin-top: 18px; }
+  .term { font-size: 26px; margin-top: 10px; }
+  .term b { color: {{ accent }}; }
+  .right { width: 397px; padding: 28px 22px; box-sizing: border-box; }
+  .mtitle { font-size: 30px; font-weight: 700; margin-bottom: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 26px; text-align: center; }
+  th { font-size: 22px; padding-bottom: 8px; border-bottom: 2px solid {{ ink.black }}; }
+  td { height: 50px; font-weight: 700; }
+  td.out { color: {{ ink.white }}; }
+  td.we { color: {{ accent }}; }
+  td.today span { background: {{ accent }}; color: {{ ink.white }}; padding: 2px 8px; }
+  .fest { font-size: 24px; margin-top: 12px; color: {{ accent }}; font-weight: 700; }
+</style></head><body>
+  <div class="left">
+    <div class="ym">{{ data.year }}年{{ data.month }}月</div>
+    <div class="day">{{ data.day }}</div>
+    <div class="wd">星期{{ data.weekday_zh }} · {{ data.weekday_en }}</div>
+    <div class="lunar">{{ data.year_ganzhi }}{{ data.zodiac }}年 {{ data.lunar_month }}{{ data.lunar_day }}</div>
+    <div class="term">
+      {%- if data.solar_term %}今日 <b>{{ data.solar_term }}</b>
+      {%- else %}距{{ data.next_term }}还有 <b>{{ data.next_term_days }}</b> 天{% endif -%}
+    </div>
+    {%- if data.festivals %}<div class="fest">{{ data.festivals | join(" · ") }}</div>{% endif %}
+  </div>
+  <div class="right">
+    <div class="mtitle">{{ data.month_en }} {{ data.year }}</div>
+    <table>
+      <tr>{% for w in "一二三四五六日" %}<th>{{ w }}</th>{% endfor %}</tr>
+      {%- for week in data.grid %}
+      <tr>{% for c in week %}<td class="{{ 'out' if not c.in_month else ('today' if c.today else ('we' if c.weekend else '')) }}"><span>{{ c.day }}</span></td>{% endfor %}</tr>
+      {%- endfor %}
+    </table>
+  </div>
+</body></html>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 36px 48px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 12px; }
+  .name { font-size: 48px; font-weight: 900; }
+  .code { font-size: 28px; font-weight: 700; }
+  .price { font-size: 150px; font-weight: 900; line-height: 1.1; margin-top: 28px; letter-spacing: -2px; }
+  .chg { font-size: 56px; font-weight: 900; color: {{ data.color }}; }
+  .foot { position: absolute; left: 48px; right: 48px; bottom: 30px; display: flex; justify-content: space-between;
+          font-size: 22px; font-weight: 700; white-space: nowrap; border-top: 2px solid {{ ink.black }}; padding-top: 10px; }
+</style></head><body>
+  <div class="head"><span class="name">{{ data.name }}</span><span class="code">{{ data.code }}</span></div>
+  <div class="price">{{ data.price }}</div>
+  <div class="chg">{{ "▲" if data.direction == "up" else ("▼" if data.direction == "down" else "■") }} {{ data.change }}  {{ data.change_pct }}</div>
+  <div class="foot"><span>H {{ data.high }} · L {{ data.low }} · {{ data.prev_label }} {{ data.prev_close }}</span><span>{{ data.time }}</span></div>
+</body></html>

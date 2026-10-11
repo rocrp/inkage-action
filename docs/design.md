@@ -46,7 +46,7 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
 4. Due → `fetch()` → `render()` → dither → indexed PNG + Sidecar + Preview + configured Encoders. Runtime failure → keep previous Frame, record `error` in Manifest entry.
 5. Not due → copy previous Frame + Sidecar unchanged.
 6. Write `manifest.json`, `index.html` gallery.
-7. Exit non-zero if any Source failed at runtime (site still deploys; GitHub notifies).
+7. Exit 3 if any Source failed at runtime (Site still written and deployed, then the job fails so GitHub notifies). Config errors exit 2 before any output; crashes exit 1 and deploy nothing.
 
 ## Site layout
 
@@ -63,29 +63,32 @@ Manifest entry: `source, panel, url, sha256, generated_at, next_due, error?`. De
 
 ## Panel
 
-`id, width, height, palette (bw|bwr|bwry|spectra6), nominal[], measured[]?, encoders[]`. Palette is always a **prefix of Ink Order** `black, white, red, yellow, blue, green`. `nominal` is written into the PNG palette; `measured` (default = nominal) is the dither target. Presets catalog ships: 250×122, 296×128, 400×300, 648×480, 800×480 in their common palettes; 800×480 and 400×600 Spectra 6. Measured values: BWR/BWRY from EPD-nRF5 reference, Spectra 6 white-balanced from epdoptimize (credited).
+`id, width, height, palette (bw|bwr|bwry|spectra6), nominal[], measured[]?, encoders[]`. Palette is always a **prefix of Ink Order** `black, white, red, yellow, blue, green`. `nominal` is written into the PNG palette; `measured` (default = nominal) is the dither target. Presets catalog ships: 250×122, 296×128, 400×300, 648×480, 800×480 in their common palettes; 800×480 and 400×600 Spectra 6. Measured values: BW/BWR/BWRY = nominal (the EPD-nRF5 web tool dithers against pure colors too; measure a panel and set `measured` to improve); Spectra 6 white-balanced from epdoptimize (credited). Preset ids are `<w>x<h>-<palette>`.
 
 Known trap: Pillow `quantize` palette image must hold exactly N entries; padding to 256 produces phantom indices.
 
 ## Source
 
 ```python
-class Csi300(Source):
+class Index(QuoteSource):
     sizes = [(800, 480), (400, 300)]           # compatibility by size, not panel id
     schedule = Schedule(every="5m", window=Window("09:30-15:00", "mon-fri"), fallback="6h")
     dither = "threshold"                        # UI default; photo sources use "floyd-steinberg" etc.
     requires_secrets = []
+    timezone = "Asia/Shanghai"                  # Schedule/display zone unless config overrides
+    params = {"symbol": "sh000300"}             # config keys + defaults; unknown keys rejected
+    fields = ("price", "change")                # fetch result must hold these, non-empty
     async def fetch(self, ctx) -> dict: ...     # must raise on incomplete data
-    def render(self, ctx, panel) -> str | Image: ...  # default: Jinja2 templates/<w>x<h>.html
+    def render(self, ctx, panel, data) -> str | Image: ...  # default: Jinja2 templates/<w>x<h>.html
 ```
 
 Loading: built-in `sources/<name>/`, user `sources_dir/<name>/`. A Source may be template-only (no Python). Template context includes `panel.palette` so layouts can use red when available. Config selects Sources, picks Panels, overrides Schedule.
 
 ## Rendering
 
-- Primary: HTML → Playwright Chromium (Linux runner). Fontconfig `antialias=false` on the runner makes text hard-edged; verify in prototype.
+- Primary: HTML → Playwright Chromium headless shell (Linux runner). `scripts/setup-runner.sh` writes a fontconfig rule `antialias=false` + full hinting, and Chromium launches with `--font-render-hinting=none --disable-lcd-text`; macOS gets `-webkit-font-smoothing: none`. The E2E test asserts the raw render holds only the template's ink colors (no grey text edges) and runs in CI on the Linux runner.
 - Secondary: Pillow drawing for pixel-exact small panels.
-- Dither per Source: `threshold` (nearest measured color), `floyd-steinberg`, `atkinson`, `stucki`, `jjn`, `burkes`, `sierra`, `bayer4`, `bayer8`; serpentine + strength options; YCbCr-weighted distance. Photo Sources render at 2× then downsample.
+- Dither per Source: `threshold` (nearest measured color), `floyd-steinberg`, `atkinson`, `stucki`, `jjn`, `burkes`, `sierra`, `bayer4`, `bayer8`; serpentine + strength options; YCbCr-weighted distance. Photo Sources opt into `supersample = 2` (render at 2×, Lanczos downsample). Error diffusion keeps integer pixel values: incoming error is truncated toward zero before it is added, then clipped (Pillow's convention), so FS matches Pillow exactly where Pillow is exact. Pillow is *not* exact on colorful input (coarse nearest-color cache) nor at the right edge (it writes the blue channel's carried error into all three channels at each row end), so the golden test compares grey input on BW away from that edge.
 - Fonts: `apt install fonts-noto-cjk` in the action; user `fonts/` appended; pixel fonts (GPL bitmap) bundled.
 
 ## Config (`inkage.toml`)
@@ -107,20 +110,26 @@ panels = ["p75-bwr", "p213-bwr"]
 schedule = { at = ["00:05"] }
 
 [sources.index]
-symbol = "000300"          # CSI 300
+symbol = "sh000300"        # Tencent code: CSI 300 (sh000001 = SSE Composite)
 panels = ["p75-bwr"]
 schedule = { every = "5m", window = { time = "09:30-15:00", days = "mon-fri" }, fallback = "6h" }
 ```
 
-Default config enables `800x480-bwr`, `250x122-bwr`, `800x480-spectra6`.
+Default config enables `800x480-bwr`, `250x122-bwr`, `800x480-spectra6`. A source table key is the instance id (site path); `source = "index"` lets one Source appear twice (CSI 300 and SSE).
 
 ## MVP
 
 1. `calendar` Source end-to-end (config → render → dither → Site → Pages) on the default repo.
-2. `index` (CSI 300 / SSE) and `stock` (US equities) — data sources: key-less, runner-reachable; to be researched.
+2. `index` (CSI 300 / SSE) and `stock` (US equities) — data source below.
 3. Encoder `pcim` only (hardware available; byte-level spec as test oracle).
 
-Out of scope here: the rctlsr BLE bridge (consumes the indexed PNG from its own host tool).
+Out of scope here: host-side device bridges (e.g. a BLE price-tag bridge consuming the indexed PNG with its own tool).
+
+## Market data
+
+Primary, both markets: Tencent `https://qt.gtimg.cn/q=<code>` (`sh000300`, `sh000001`, `usAAPL`). No key, no headers, GBK text `v_<code>="f0~f1~…";`. Fields: 1 name, 2 code, 3 last, 4 prev close, 30 time, 31 change, 32 change %, 33/34 high/low. Time is `YYYYMMDDHHMMSS` Asia/Shanghai for China, `YYYY-MM-DD HH:MM:SS` America/New_York for US. Unknown code → `v_pv_none_match="1";` (raises). Quotes older than `max_age_hours` (index 240 h spans Golden Week, stock 120 h) raise. Parsing is tested against captured responses in `tests/fixtures/quotes/`; reachability from runners is proven by the live Site's Runs.
+
+Fallback (not implemented, switch here if Tencent blocks runners): Eastmoney `https://push2.eastmoney.com/api/qt/stock/get?secid=1.000300&fields=f43,f57,f58,f59,f60,f86,f169,f170` (JSON; prices × 10^f59, f170 = change % × 100, f86 = Unix time; US via `secid=105.AAPL`). Rejected: Yahoo (429 without browser UA, cloud IPs throttled), Sina (needs Referer), Stooq (endpoint gone).
 
 ## Testing
 
@@ -131,4 +140,4 @@ Out of scope here: the rctlsr BLE bridge (consumes the indexed PNG from its own 
 ## Operations
 
 - Default workflow cron `2-59/5 * * * *` (off the hour).
-- License MIT. inkboard (GPLv3) and rcinkimage are idea sources only; no code copied.
+- License MIT. inkboard (GPLv3) and other prior projects are idea sources only; no code copied.
