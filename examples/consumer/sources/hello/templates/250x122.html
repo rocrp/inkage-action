@@ -1,0 +1,9 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font: 700 28px/1.2 sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .accent { color: {{ ink.red if 'red' in panel.inks else ink.black }}; }
+</style></head><body>
+  <div>Hello, e-paper</div>
+  <div class="accent">{{ now.strftime("%H:%M") }}</div>
+</body></html>

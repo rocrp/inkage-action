@@ -1,0 +1,68 @@
+# Reusable workflow: render the caller's inkage.toml and deploy it to the caller's GitHub Pages.
+# Caller needs: permissions { contents: read, pages: write, id-token: write, actions: write }.
+name: inkage-publish
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        type: string
+        default: inkage.toml
+      sources_dir:
+        type: string
+        default: ""
+      fonts_dir:
+        type: string
+        default: ""
+      keepalive:
+        description: Re-enable the calling workflow on scheduled runs so 60 days without commits cannot disable it
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # The action at the very commit of this workflow file, whatever ref the caller used.
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .inkage-action
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - id: inkage
+        uses: ./.inkage-action
+        with:
+          config: ${{ inputs.config }}
+          sources_dir: ${{ inputs.sources_dir }}
+          fonts_dir: ${{ inputs.fonts_dir }}
+          site_url: ${{ steps.pages.outputs.base_url }}
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ steps.inkage.outputs.dist }}
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Keep the schedule alive
+        if: inputs.keepalive && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          wf="${GITHUB_WORKFLOW_REF#*/.github/workflows/}"
+          gh workflow enable "${wf%@*}" -R "$GITHUB_REPOSITORY"
+
+      - name: Fail if a Source failed
+        if: steps.inkage.outputs.failed == 'true'
+        run: |
+          echo "::error::At least one Source failed; its previous Frame was kept. See the job summary."
+          exit 1

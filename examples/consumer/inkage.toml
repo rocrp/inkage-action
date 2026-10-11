@@ -1,0 +1,9 @@
+[defaults]
+timezone = "Europe/Berlin"
+
+[sources.calendar]
+panels = ["800x480-bwr"]
+
+[sources.hello]          # template-only custom Source from ./sources/hello
+panels = ["250x122-bwr"]
+schedule = { every = "1h" }

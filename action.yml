@@ -1,0 +1,65 @@
+name: Inkage
+description: Render scheduled e-paper Frames (indexed PNG + Manifest) into a static Site directory
+branding:
+  icon: image
+  color: gray-dark
+
+inputs:
+  config:
+    description: Path to inkage.toml
+    default: inkage.toml
+  sources_dir:
+    description: Directory of custom Sources (sources/<name>/)
+    default: ""
+  fonts_dir:
+    description: Directory of fonts for templates (default ./fonts when present)
+    default: ""
+  site_url:
+    description: Live Site URL holding the previous Manifest; empty regenerates everything
+    default: ""
+  out:
+    description: Output directory for the Site
+    default: dist
+
+outputs:
+  dist:
+    description: Directory holding the generated Site
+    value: ${{ steps.run.outputs.dist }}
+  failed:
+    description: "'true' when a Source failed at runtime (the Site was still written with its previous Frame)"
+    value: ${{ steps.run.outputs.failed }}
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: ${{ github.action_path }}/uv.lock
+
+    - id: versions
+      shell: bash
+      run: echo "playwright=$(grep -A1 '^name = "playwright"$' "$GITHUB_ACTION_PATH/uv.lock" | sed -n 's/^version = "\(.*\)"$/\1/p')" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.versions.outputs.playwright }}
+
+    - uses: actions/cache@v4
+      with:
+        path: ~/.local/share/fonts/noto-cjk
+        key: fonts-noto-cjk-${{ runner.os }}-v1
+
+    - shell: bash
+      run: '"$GITHUB_ACTION_PATH/scripts/setup-runner.sh" "$GITHUB_ACTION_PATH"'
+
+    - id: run
+      shell: bash
+      env:
+        INKAGE_CONFIG: ${{ inputs.config }}
+        INKAGE_SOURCES_DIR: ${{ inputs.sources_dir }}
+        INKAGE_FONTS_DIR: ${{ inputs.fonts_dir }}
+        INKAGE_SITE_URL: ${{ inputs.site_url }}
+        INKAGE_OUT: ${{ inputs.out }}
+      run: '"$GITHUB_ACTION_PATH/scripts/action-run.sh"'
