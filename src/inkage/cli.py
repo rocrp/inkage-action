@@ -150,7 +150,7 @@ def run_cmd(
     """Regenerate due Frames, carry the rest over, write the full Site."""
     cfg = _load(config, sources_dir)
     get = http_getter(site_url) if site_url else (lambda _path: None)
-    result = asyncio.run(run(cfg, get, out, _now(now), site_url=site_url, fonts_dir=fonts_dir))
+    result = asyncio.run(run(cfg, get, out, _now(now), fonts_dir=fonts_dir))
     _summary(result)
     if not result.ok:
         typer.echo(f"{len(result.errors)} Frame(s) failed; Site written with previous Frames kept", err=True)

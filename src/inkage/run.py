@@ -79,10 +79,6 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _url(site_url: str, path: str) -> str:
-    return f"{site_url.rstrip('/')}/{path}" if site_url else path
-
-
 async def frame_from_data(
     renderer: Renderer, src: Source, ctx: Context, panel: Panel, sc: SourceConfig, data: dict
 ) -> Image.Image:
@@ -102,14 +98,7 @@ def context_for(sc: SourceConfig, now: datetime) -> Context:
     )
 
 
-async def run(
-    config: Config,
-    get: Getter,
-    out: Path,
-    now: datetime,
-    site_url: str = "",
-    fonts_dir: Path | None = None,
-) -> RunResult:
+async def run(config: Config, get: Getter, out: Path, now: datetime, fonts_dir: Path | None = None) -> RunResult:
     previous = Manifest.from_bytes(raw) if (raw := get(MANIFEST)) is not None else None
     if previous is None:
         logger.warning("no previous Manifest reachable; regenerating every Frame")
@@ -144,7 +133,7 @@ async def run(
         logger.error(f"{sc.id}/{d.panel.id}: {error}")
         old = d.previous
         kept = old if old and old.sha256 and carry(old) else None
-        entries[key] = replace(kept, error=error) if kept else _failed_entry(sc, d.panel, site_url, error)
+        entries[key] = replace(kept, error=error) if kept else _failed_entry(sc, d.panel, error)
         files[sidecar_path(*key)] = sidecar_bytes(entries[key])
 
     async with Renderer(fonts_dir) as renderer:
@@ -164,7 +153,7 @@ async def run(
                 except Exception as e:  # noqa: BLE001
                     fail(sc, d, _describe(e))
                     continue
-                entries[(sc.id, d.panel.id)] = _write_frame(files, frame, sc, d, now, site_url)
+                entries[(sc.id, d.panel.id)] = _write_frame(files, frame, sc, d, now)
                 logger.info(f"{sc.id}/{d.panel.id}: generated ({d.reason})")
 
     manifest = Manifest(generated_at=iso(now) or "", frames=[entries[(d.source.id, d.panel.id)] for d in decisions])
@@ -181,11 +170,11 @@ def _describe(e: Exception) -> str:
     return f"{type(e).__name__}: {e}"
 
 
-def _failed_entry(sc: SourceConfig, panel: Panel, site_url: str, error: str) -> Entry:
+def _failed_entry(sc: SourceConfig, panel: Panel, error: str) -> Entry:
     return Entry(
         source=sc.id,
         panel=panel.id,
-        url=_url(site_url, frame_path(sc.id, panel.id)),
+        url=frame_path(sc.id, panel.id),
         sha256=None,
         generated_at=None,
         next_due=None,
@@ -193,9 +182,7 @@ def _failed_entry(sc: SourceConfig, panel: Panel, site_url: str, error: str) -> 
     )
 
 
-def _write_frame(
-    files: dict[str, bytes], frame: Image.Image, sc: SourceConfig, d: Decision, now: datetime, site_url: str
-) -> Entry:
+def _write_frame(files: dict[str, bytes], frame: Image.Image, sc: SourceConfig, d: Decision, now: datetime) -> Entry:
     s, p = sc.id, d.panel.id
     png = png_bytes(frame)
     files[frame_path(s, p)] = png
@@ -204,11 +191,11 @@ def _write_frame(
     for name in d.panel.encoders:
         blob = ENCODERS[name].encode(frame, d.panel.ink_count)
         files[encoder_path(s, p, name)] = blob
-        encoders[name] = {"url": _url(site_url, encoder_path(s, p, name)), "sha256": _sha(blob)}
+        encoders[name] = {"url": encoder_path(s, p, name), "sha256": _sha(blob)}
     entry = Entry(
         source=s,
         panel=p,
-        url=_url(site_url, frame_path(s, p)),
+        url=frame_path(s, p),
         sha256=_sha(png),
         generated_at=iso(now),
         next_due=iso(d.next_due),

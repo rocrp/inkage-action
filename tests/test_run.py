@@ -45,7 +45,7 @@ def tree(root: Path) -> dict[str, bytes]:
 
 
 def do_run(cfg, get, out: Path, now: datetime) -> RunResult:
-    return asyncio.run(run(cfg, get, out, now, site_url="https://example.test/site"))
+    return asyncio.run(run(cfg, get, out, now))
 
 
 def test_no_previous_site_generates_everything(tmp_path):
@@ -88,7 +88,7 @@ def test_manifest_entry_fields_and_next_due(tmp_path):
     frames = {(e["source"], e["panel"]): e for e in json.loads((tmp_path / "manifest.json").read_bytes())["frames"]}
     daily = frames[("daily", "250x122-bwr")]
     assert set(daily) == {"source", "panel", "url", "sha256", "generated_at", "next_due", "encoders"}
-    assert daily["url"] == "https://example.test/site/daily/250x122-bwr.png"
+    assert daily["url"] == "daily/250x122-bwr.png"  # Site-relative: mirrors need no rewriting
     assert daily["generated_at"] == "2026-10-12T00:00:00Z"  # 08:00 Shanghai
     assert daily["next_due"] == "2026-10-12T16:05:00Z"  # next 00:05 Shanghai
     assert frames[("clock", "250x122-bw")]["next_due"] == "2026-10-12T00:05:00Z"
@@ -146,7 +146,7 @@ def test_encoder_outputs_only_where_configured(tmp_path):
     assert pcim[:4] == b"PCIM" and len(pcim) == 16 + 125 * 122
     assert not (tmp_path / "daily/250x122-bw.pcim").exists()
     frames = {e["panel"]: e for e in json.loads((tmp_path / "manifest.json").read_bytes())["frames"]}
-    assert frames["tag"]["encoders"]["pcim"]["url"] == "https://example.test/site/daily/tag.pcim"
+    assert frames["tag"]["encoders"]["pcim"]["url"] == "daily/tag.pcim"
     assert frames["250x122-bw"]["encoders"] == {}
 
 

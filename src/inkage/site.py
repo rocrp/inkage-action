@@ -16,7 +16,7 @@ from inkage.encoders import ENCODERS
 
 MANIFEST = "manifest.json"
 # Bumped on any Manifest schema change; a previous Site with another version is treated as absent.
-MANIFEST_VERSION = 1
+MANIFEST_VERSION = 2
 
 # Fetch one Site-relative path from the previous Site; None when absent/unreachable.
 type Getter = Callable[[str], bytes | None]
@@ -50,6 +50,8 @@ def encoder_path(source: str, panel: str, encoder: str) -> str:
 class Entry:
     source: str
     panel: str
+    # Site-relative, like every URL in the Manifest: devices join it with the base they fetched the Manifest from,
+    # so a mirror of the Site needs no rewriting.
     url: str
     sha256: str | None
     generated_at: str | None
