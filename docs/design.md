@@ -56,12 +56,14 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
 
 ```
 /manifest.json
-/index.html                    gallery: Preview + URL + generated_at per Frame
+/index.html                    Gallery: Previews grouped by Source, Freshness per Source, Chain heartbeat (overdue = next_due + 10 min)
 /<source>/<panel>.png          Frame (indexed PNG, exactly N palette entries, Ink Order)
 /<source>/<panel>.json         Sidecar
 /<source>/<panel>.preview.png  Preview (RGB)
 /<source>/<panel>.<enc>        Encoder output (.pcim, later .bin/.bmp/.jpg)
 ```
+
+The Gallery is self-contained (inline style and script, no requests beyond Site-relative Previews and links); its 10 min grace is the only place the Overdue threshold is defined.
 
 Manifest entry: `source, panel, url, sha256, generated_at, next_due, error?`. Every `url` is Site-relative (devices join it with the base they fetched the Manifest from), so a mirror of the Site for networks where github.io is unreachable needs no rewriting. Devices use `If-None-Match` (Pages serves ETag) and may sleep until `next_due`.
 

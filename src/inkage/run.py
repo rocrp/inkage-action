@@ -14,6 +14,7 @@ from PIL import Image
 from inkage.config import Config, SourceConfig
 from inkage.encoders import ENCODERS
 from inkage.frame import check_frame, frame_to_panel, make_frame, png_bytes, preview
+from inkage.gallery import gallery_html
 from inkage.panel import Panel
 from inkage.render import Renderer
 from inkage.site import (
@@ -23,7 +24,6 @@ from inkage.site import (
     Manifest,
     encoder_path,
     frame_path,
-    gallery_html,
     iso,
     parse_iso,
     preview_path,

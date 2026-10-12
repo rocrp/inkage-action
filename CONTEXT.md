@@ -50,5 +50,13 @@ A named, built-in Panel definition (e.g. a specific Waveshare module) that a con
 The Site's index of every current Frame with its URL, content hash, generation time, and next due time. The Run reads the previous Manifest to decide what is due; devices read it to decide when to wake.
 _Avoid_: Index, state file
 
+**Gallery**:
+The Site's human-facing index page: every Source's Frames as Previews with their Freshness. Devices never read it.
+_Avoid_: Index page, dashboard, homepage
+
+**Freshness**:
+Whether a Frame is still within its Schedule: **Fresh** until its next due time passes, **Overdue** once it is past by more than a short grace. A Frame failing its Source keeps its Freshness; the error is shown separately.
+_Avoid_: Stale, expired
+
 **Sidecar**:
 A per-Frame JSON file beside the Frame holding that Frame's Manifest entry alone, for devices that cannot parse the whole Manifest.
