@@ -1,6 +1,6 @@
 # inkage-action
 
-Ready-to-display images for e-paper panels, rendered on a schedule by **GitHub Actions only** and published as a static GitHub Pages Site that devices download. No server.
+Ready-to-display images for e-paper panels, rendered on a schedule by **GitHub Actions only** and published as a static GitHub Pages Site that devices download. No server. Refresh cadence is real (down to a minute): each Run dispatches the next one, so GitHub's unreliable cron is not in the loop.
 
 - Live Site of this repo: <https://rocrp.github.io/inkage-action/> (gallery) · [`manifest.json`](https://rocrp.github.io/inkage-action/manifest.json)
 - Vocabulary: [`CONTEXT.md`](CONTEXT.md) · design: [`docs/design.md`](docs/design.md) · decisions: [`docs/adr/`](docs/adr/)
@@ -25,16 +25,13 @@ Each **Frame** is an indexed PNG whose palette has exactly N entries in the fixe
    name: inkage
    on:
      schedule:
-       - cron: "2-59/5 * * * *"      # every 5 min, off the top of the hour
-     workflow_dispatch:
+       - cron: "2-59/5 * * * *"      # only restarts the chain if it ever breaks
+     workflow_dispatch:              # required: each Run dispatches the next
    permissions:
      contents: read
      pages: write
      id-token: write
-     actions: write                  # keepalive: re-enables the schedule
-   concurrency:
-     group: inkage-pages
-     cancel-in-progress: false
+     actions: write                  # dispatch the next Run, re-enable the schedule
    jobs:
      publish:
        uses: rocrp/inkage-action/.github/workflows/publish.yml@v1
@@ -42,14 +39,17 @@ Each **Frame** is an indexed PNG whose palette has exactly N entries in the fixe
        #   config: inkage.toml
        #   sources_dir: sources       # custom Sources
        #   fonts_dir: fonts           # defaults to ./fonts when present
+       #   chain: false               # private repo: do not keep a (billed) job waiting
    ```
 
 3. Repo **Settings → Pages → Source: GitHub Actions** (or `gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow`).
 4. Run the workflow once (`gh workflow run inkage`). Frames appear at `https://OWNER.github.io/REPO/<source>/<panel>.png`.
 
+That first run starts the **chain**: after deploying, a second job waits until the earliest `next_due` and dispatches the next Run. GitHub's `schedule` drops most 5-minute ticks (measured: 3 of ~130 in 11 hours), so the cron is only there to restart the chain after a runner dies. A push or manual run deploys immediately and takes over the chain. The chain keeps one mostly-sleeping job alive around the clock: free on public repos, billed on private ones (set `chain: false` there and live with cron). For belt and braces, any external cron can `gh workflow run inkage -R OWNER/REPO` with a token holding `actions: write`.
+
 A complete example lives in [`examples/consumer/`](examples/consumer/).
 
-**Only the action** (publish somewhere else, e.g. release assets): `uses: rocrp/inkage-action@v1` with inputs `config`, `sources_dir`, `fonts_dir`, `site_url` (live Site holding the previous Manifest; empty = regenerate all), `out`. Outputs: `dist` (Site directory) and `failed` (`'true'` if a Source failed at runtime).
+**Only the action** (publish somewhere else, e.g. release assets): `uses: rocrp/inkage-action@v1` with inputs `config`, `sources_dir`, `fonts_dir`, `site_url` (live Site holding the previous Manifest; empty = regenerate all), `out`. Outputs: `dist` (Site directory), `failed` (`'true'` if a Source failed at runtime) and `next_due` (earliest next due time, for your own chain step).
 
 ### Custom Sources
 
@@ -100,24 +100,32 @@ preset = "800x480-spectra6"
 
 [sources.csi300]                      # instance id = site path
 source = "index"                      # Source name (default: the instance id)
-symbol = "sh000300"                   # Source params
+symbols = ["sh000300", "sh000001"]  # Source params; several symbols = one Watchlist Frame
 panels = ["tag", "800x480-bwr"]
 timezone = "Asia/Shanghai"            # optional override
 schedule = { every = "5m", window = { time = "09:30-15:00", days = "mon-fri" }, fallback = "6h" }
 dither = { method = "atkinson", serpentine = true, strength = 0.8, distance = "ycbcr" }
 ```
 
-- **Schedule**: `every` (+ optional `window` and `fallback`; no fallback = no refresh outside the window) or `at = ["00:05", "12:00"]`, never both. A window crossing midnight belongs to the weekday it starts on. Four minutes of tolerance (one 5-minute tick minus a minute) absorb cron jitter: a late Run followed by an on-time one never skips a cycle.
+- **Schedule**: `every` (+ optional `window` and `fallback`; no fallback = no refresh outside the window) or `at = ["00:05", "12:00"]`, never both. A window crossing midnight belongs to the weekday it starts on. Four minutes of tolerance absorb Run jitter: a late Run followed by an on-time one never skips a cycle. `every = "1m"` works (a Run takes about a minute), but every regeneration is a Pages deploy and, on the device, an e-paper refresh; 5 minutes is the sensible floor for prices.
 - **Presets**: `{250x122,296x128,400x300,648x480,800x480}-{bw,bwr,bwry}`, `800x480-spectra6`, `400x600-spectra6`.
 - **Dither**: `threshold` (nearest color, default for UI), `floyd-steinberg`, `atkinson`, `stucki`, `jjn`, `burkes`, `sierra`, `bayer4`, `bayer8`; options `serpentine`, `strength` (0–2), `distance` (`rgb` | `ycbcr`).
 
-Built-in Sources:
+Built-in Sources (all key-less; every one has 800×480 and 250×122 layouts unless noted):
 
 | Source | What | Default Schedule | Params |
 |---|---|---|---|
 | `calendar` | date, weekday, lunar date, solar term, festivals, month grid | daily 00:05 | — |
-| `index` | China index (up = red) | 5 min 09:30–15:00 Mon–Fri Asia/Shanghai, else 6 h | `symbol` (`sh000300` CSI 300, `sh000001` SSE), `label`, `max_age_hours` |
-| `stock` | US equity (up = green or black, down = red) | 5 min 09:30–16:00 Mon–Fri America/New_York, else 12 h | `symbol`, `label`, `max_age_hours` |
+| `index` | China indices (up = red); several `symbols` = a Watchlist table | 5 min 09:30–15:00 Mon–Fri Asia/Shanghai, else 6 h | `symbols` (Tencent codes: `sh000300` CSI 300, `sh000001` SSE, `sz399006` ChiNext), `label` (single symbol only), `max_age_hours` |
+| `stock` | US equities (up = green or black, down = red); Watchlist as above | 5 min 09:30–16:00 Mon–Fri America/New_York, else 12 h | `symbols`, `label`, `max_age_hours` |
+| `crypto` | Kraken spot prices, change since today's open, 24 h range; up to 6 coins | every 5 min, 24/7 | `symbols` (`BTC`, `ETH`, `SOL`, `DOGE`, …), `quote` (`USD`) |
+| `weather` | Open-Meteo current conditions + 5-day forecast | every 30 min | `latitude`, `longitude`, `label`, `units` (`celsius` / `fahrenheit`) |
+| `fx` | ECB rates via Frankfurter, change vs previous business day | every 6 h | `base`, `symbols` (1–6) |
+| `astro` | sunrise, sunset, dawn/dusk, day length, moon phase; offline (`astral`) | daily 00:05 | `latitude`, `longitude`, `label`; the Source's `timezone` must match the location |
+| `github` | repo stars, forks, issues, last commit, latest release | every 30 min | `repo` (`owner/name`); uses `GITHUB_TOKEN` when set |
+| `news` | Hacker News top stories, or any RSS/Atom feed | every 30 min | `feed` (`hn` or a URL), `count` (1–30), `label` |
+| `countdown` | days until (or since) your events; offline | daily 00:05 | `events = [{ title, date, repeat = "yearly" \| "none" }]` |
+| `photo` | a photo cover-cropped to the Panel, Atkinson-dithered; any Preset size | daily 00:10 | `url` (empty = Bing's photo of the day) |
 
 ## Site
 
@@ -130,7 +138,7 @@ index.html                      gallery
 <source>/<panel>.pcim           Encoder output, when enabled
 ```
 
-Devices: fetch the Sidecar (or Manifest), compare `sha256`, download the PNG with `If-None-Match`, sleep until about `next_due` (a hint: Actions cron runs 5–30 min late under load). A Source that fails keeps its previous Frame, gets `error` in its entry, and fails the workflow run after the Site is deployed.
+Devices: fetch the Sidecar (or Manifest), compare `sha256`, download the PNG with `If-None-Match`, sleep until about `next_due` plus a minute (Run overhead; after a broken chain the cron's recovery takes hours). Every `url` is Site-relative: join it with the base you fetched the Manifest from, so a mirror of the Site works unchanged. A Source that fails keeps its previous Frame, gets `error` in its entry, and fails the workflow run after the Site is deployed.
 
 **pcim**: 16-byte little-endian header `"PCIM"`, version `1`, bpp `4`, palette count, reserved `0`, width u16, height u16, payload length u32; then 4bpp pixels, high nibble first, rows padded to a whole byte.
 

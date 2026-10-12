@@ -1,5 +1,6 @@
-# Reusable workflow: render the caller's inkage.toml and deploy it to the caller's GitHub Pages.
-# Caller needs: permissions { contents: read, pages: write, id-token: write, actions: write }.
+# Reusable workflow: render the caller's inkage.toml and deploy it to the caller's GitHub Pages,
+# then hand over to the next Run (the Chain, see docs/adr/0003-self-dispatch-chain.md).
+# Caller needs: `on: workflow_dispatch` and permissions { contents: read, pages: write, id-token: write, actions: write }.
 name: inkage-publish
 
 on:
@@ -14,6 +15,10 @@ on:
       fonts_dir:
         type: string
         default: ""
+      chain:
+        description: After deploying, wait until the earliest next_due and dispatch the next Run (needs free minutes, i.e. a public repo)
+        type: boolean
+        default: true
       keepalive:
         description: Re-enable the calling workflow on scheduled runs so 60 days without commits cannot disable it
         type: boolean
@@ -22,9 +27,15 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Runs queue behind each other; nothing is cancelled, so a Site is never half-deployed.
+    concurrency:
+      group: inkage-publish
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      next_due: ${{ steps.inkage.outputs.next_due }}
     steps:
       - uses: actions/checkout@v5
 
@@ -66,3 +77,23 @@ jobs:
         run: |
           echo "::error::At least one Source failed; its previous Frame was kept. See the job summary."
           exit 1
+
+  chain:
+    needs: publish
+    if: inputs.chain
+    runs-on: ubuntu-latest
+    # Exactly one waiter at a time: a newer Run (push, cron, dispatch) replaces the one sleeping.
+    concurrency:
+      group: inkage-chain
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          sparse-checkout: scripts/chain-next.sh
+          sparse-checkout-cone-mode: false
+      - name: Wait for next_due, then dispatch the next Run
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: scripts/chain-next.sh "${{ needs.publish.outputs.next_due }}"

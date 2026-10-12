@@ -31,7 +31,14 @@ A Source's refresh policy: a minimum interval plus an optional active window (lo
 _Avoid_: Cron, period, timer
 
 **Run**:
-One execution of the workflow. It evaluates every configured Source's Schedule, regenerates only the Frames that are due, carries the rest over unchanged, and publishes the whole site.
+One execution of the workflow. It evaluates every configured Source's Schedule, regenerates only the Frames that are due, carries the rest over unchanged, publishes the whole Site, and hands over to the next Run.
+
+**Chain**:
+The unbroken sequence of Runs in which each Run waits until the Site's earliest next-due time and then starts its successor. The platform's own timer only restarts a Chain that broke.
+_Avoid_: Loop, daemon, heartbeat
+
+**Watchlist**:
+Several symbols shown together on one Frame by a market Source, as opposed to one symbol per Frame.
 
 **Site**:
 The published static output (all current Frames plus a manifest) that devices fetch from GitHub Pages.

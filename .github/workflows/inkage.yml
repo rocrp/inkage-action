@@ -3,7 +3,7 @@ name: inkage
 
 on:
   schedule:
-    - cron: "2-59/5 * * * *" # every 5 minutes, off the top of the hour
+    - cron: "2-59/5 * * * *" # resurrects the Chain; GitHub fires this hours late or not at all
   workflow_dispatch:
   push:
     branches: [main]
@@ -13,10 +13,6 @@ permissions:
   pages: write
   id-token: write
   actions: write
-
-concurrency:
-  group: inkage-pages
-  cancel-in-progress: false
 
 jobs:
   publish:

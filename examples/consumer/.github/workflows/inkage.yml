@@ -8,9 +8,6 @@ permissions:
   pages: write
   id-token: write
   actions: write
-concurrency:
-  group: inkage-pages
-  cancel-in-progress: false
 jobs:
   publish:
     uses: rocrp/inkage-action/.github/workflows/publish.yml@v1

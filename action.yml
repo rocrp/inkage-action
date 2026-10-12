@@ -28,6 +28,9 @@ outputs:
   failed:
     description: "'true' when a Source failed at runtime (the Site was still written with its previous Frame)"
     value: ${{ steps.run.outputs.failed }}
+  next_due:
+    description: Earliest next_due of any Frame (RFC 3339 UTC), empty when none is scheduled
+    value: ${{ steps.run.outputs.next_due }}
 
 runs:
   using: composite
@@ -62,4 +65,6 @@ runs:
         INKAGE_FONTS_DIR: ${{ inputs.fonts_dir }}
         INKAGE_SITE_URL: ${{ inputs.site_url }}
         INKAGE_OUT: ${{ inputs.out }}
+        # Optional: Sources that talk to the GitHub API (e.g. `github`) use it for a higher rate limit.
+        GITHUB_TOKEN: ${{ github.token }}
       run: '"$GITHUB_ACTION_PATH/scripts/action-run.sh"'

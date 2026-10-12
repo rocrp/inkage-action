@@ -1,4 +1,4 @@
-# Default config for this repo's own Site. Format: README.md "Config".
+# Default config for this repo's own Site: one demo per built-in Source. Format: README.md "Config".
 [defaults]
 timezone = "Asia/Shanghai"
 
@@ -10,11 +10,54 @@ encoders = ["pcim"]
 panels = ["800x480-bwr", "250x122-bwr", "800x480-spectra6"]
 schedule = { at = ["00:05"] }
 
-# CSI 300, 5 min during Shanghai trading hours (the Source's default Schedule).
+# CSI 300 alone, 5 min during Shanghai trading hours (the Source's default Schedule).
 [sources.index]
-symbol = "sh000300"
+symbols = ["sh000300"]
 panels = ["800x480-bwr", "250x122-bwr"]
 
+# Several symbols on one Frame = a Watchlist table.
+[sources.cn-watch]
+source = "index"
+symbols = ["sh000300", "sh000001", "sz399006"]
+panels = ["800x480-bwr"]
+
 [sources.stock]
-symbol = "AAPL"
+symbols = ["AAPL", "NVDA", "MSFT", "TSLA"]
+panels = ["800x480-spectra6"]
+
+# 24/7 every 5 minutes: the live proof that the Chain refreshes on time.
+[sources.crypto]
+symbols = ["BTC", "ETH", "SOL"]
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.weather]
+label = "Shanghai"
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.fx]
+base = "USD"
+symbols = ["CNY", "EUR", "JPY", "GBP"]
+panels = ["800x480-bwr"]
+
+[sources.astro]
+label = "Shanghai"
+panels = ["800x480-bwr"]
+
+[sources.github]
+repo = "rocrp/inkage-action"
+panels = ["800x480-bwr"]
+
+[sources.news]
+feed = "hn"
+panels = ["800x480-bwr"]
+
+[sources.countdown]
+events = [
+  { title = "New Year", date = "2027-01-01", repeat = "yearly" },
+  { title = "Spring Festival", date = "2027-02-06" },
+]
+panels = ["800x480-bwr", "250x122-bwr"]
+
+# Bing's photo of the day, dithered for Spectra 6.
+[sources.photo]
 panels = ["800x480-spectra6"]

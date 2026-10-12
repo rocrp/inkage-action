@@ -10,13 +10,12 @@ Generate e-paper Frames for many Sources × Panels on per-Source Schedules, runn
 
 | Constraint | Effect | Mitigation |
 |---|---|---|
-| `schedule` min interval 5 min | per-minute refresh impossible | Schedule = min interval + active window; stocks 5–15 min in market hours |
-| Top-of-hour delay (5–30 min), jobs may be dropped | ticks jitter / skip | cron phase `2-59/5`; due check with 1-tick tolerance; `next_due` is a hint only |
+| `schedule` ticks are mostly dropped (measured: 3 of ~130 in 11 h, 2026-10), the rest hours late | cron alone cannot refresh anything intraday | the Chain: each Run dispatches the next at `next_due` ([ADR 0003](adr/0003-self-dispatch-chain.md)); cron only resurrects |
+| Job max 6 h | one Run cannot wait longer | Chain sleep capped at 5 h 50 min; an idle Run redeploys the unchanged Site |
 | Public repo: schedules disabled after 60 days without commits | silent death | workflow step re-enables itself via `gh workflow enable` |
 | Stateless runners | no "last generated" memory | previous Manifest fetched from live Site = state |
 | Pages: custom-workflow deploys not subject to 10 builds/hour; 100 GB/month soft bandwidth; deploy ≤10 min | fine at 288 deploys/day | full-site snapshot each Run (carry-over of non-due Frames) |
 | Runner IPs blocked by some finance APIs | data source choice | default config uses only key-less, runner-reachable public sources |
-| Job max 6 h | irrelevant | — |
 
 ## Architecture
 
@@ -35,6 +34,10 @@ user repo                      inkage-action (this repo)
 ```
 
 Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config`, `sources_dir`, `site_url`; output `dist/`) and **reusable workflow** wrapping it with Pages deploy. Users default to the workflow; those wanting another publish channel (release assets) use the action. `v1` is a floating tag.
+
+## Chain
+
+`publish.yml` has two jobs. `publish` renders and deploys (concurrency `inkage-publish`, never cancelled). `chain` (`needs: publish`, concurrency `inkage-chain`, `cancel-in-progress: true`) runs `scripts/chain-next.sh`: sleep until the action's `next_due` output minus a 60 s lead (the next Run's checkout and setup), capped at 5 h 50 min, then `gh workflow run <calling workflow> --ref <branch>` with `GITHUB_TOKEN`. A push, cron tick or manual dispatch deploys at once and its own `chain` job replaces the sleeping one, so exactly one waiter exists. Input `chain: false` disables it (private repos: minutes are billed).
 
 ## Run algorithm
 
@@ -60,7 +63,7 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
 /<source>/<panel>.<enc>        Encoder output (.pcim, later .bin/.bmp/.jpg)
 ```
 
-Manifest entry: `source, panel, url, sha256, generated_at, next_due, error?`. Devices use `If-None-Match` (Pages serves ETag) and may sleep until `next_due`.
+Manifest entry: `source, panel, url, sha256, generated_at, next_due, error?`. Every `url` is Site-relative (devices join it with the base they fetched the Manifest from), so a mirror of the Site for networks where github.io is unreachable needs no rewriting. Devices use `If-None-Match` (Pages serves ETag) and may sleep until `next_due`.
 
 ## Panel
 
@@ -77,7 +80,7 @@ class Index(QuoteSource):
     dither = "threshold"                        # UI default; photo sources use "floyd-steinberg" etc.
     requires_secrets = []
     timezone = "Asia/Shanghai"                  # Schedule/display zone unless config overrides
-    params = {"symbol": "sh000300"}             # config keys + defaults; unknown keys rejected
+    params = {"symbols": ["sh000300"]}          # config keys + defaults; unknown keys rejected
     fields = ("price", "change")                # fetch result must hold these, non-empty
     async def fetch(self, ctx) -> dict: ...     # must raise on incomplete data
     def render(self, ctx, panel, data) -> str | Image: ...  # default: Jinja2 templates/<w>x<h>.html
@@ -111,7 +114,7 @@ panels = ["p75-bwr", "p213-bwr"]
 schedule = { at = ["00:05"] }
 
 [sources.index]
-symbol = "sh000300"        # Tencent code: CSI 300 (sh000001 = SSE Composite)
+symbols = ["sh000300"]     # Tencent codes: CSI 300 (sh000001 = SSE Composite); several = a Watchlist table
 panels = ["p75-bwr"]
 schedule = { every = "5m", window = { time = "09:30-15:00", days = "mon-fri" }, fallback = "6h" }
 ```
@@ -140,5 +143,6 @@ Fallback (not implemented, switch here if Tencent blocks runners): Eastmoney `ht
 
 ## Operations
 
-- Default workflow cron `2-59/5 * * * *` (off the hour).
+- Default workflow cron `2-59/5 * * * *` only resurrects the Chain; refresh cadence comes from the Chain.
+- Users who want insurance against a dead Chain can add an external pinger (`gh workflow run inkage -R OWNER/REPO` from any cron with a PAT holding `actions: write`); a dispatch while a Run is in progress just replaces the waiter.
 - License MIT. inkboard (GPLv3) and other prior projects are idea sources only; no code copied.

@@ -1,5 +1,7 @@
 # Run only on GitHub Actions; the published Site is the only state
 
+> Partly superseded by [ADR 0003](0003-self-dispatch-chain.md): the cron is no longer the refresh trigger. Everything about statelessness and the Site as state still holds.
+
 We want zero servers: every fork gets a working pipeline for free on a public repo. GitHub Actions runners are stateless and `schedule` cannot fire more often than every 5 minutes, with top-of-hour jitter and auto-disable after 60 days of inactivity. We accept these limits instead of adding an external scheduler or a server: a single workflow ticks every 5 minutes (phased off the hour), fetches the previous Manifest from the live GitHub Pages Site to learn each Frame's last generation time, regenerates only due Frames, carries the rest over, and redeploys the full Site. A keepalive step re-enables the schedule via API.
 
 ## Considered options
