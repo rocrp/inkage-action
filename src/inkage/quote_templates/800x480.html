@@ -9,9 +9,24 @@
   .chg { font-size: 56px; font-weight: 900; color: {{ data.color }}; }
   .foot { position: absolute; left: 48px; right: 48px; bottom: 30px; display: flex; justify-content: space-between;
           font-size: 22px; font-weight: 700; white-space: nowrap; border-top: 2px solid {{ ink.black }}; padding-top: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 30px; font-weight: 900; white-space: nowrap; }
+  td { padding: 3px 0; line-height: 1.2; border-bottom: 1px solid {{ ink.black }}; }
+  td.num { text-align: right; padding-left: 16px; }
+  td.n { overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
 </style></head><body>
+{% if data.quotes | length > 1 %}
+  <table>
+  {% for q in data.quotes[:8] %}
+    <tr><td class="n">{{ q.name }}</td><td class="num">{{ q.price }}</td>
+      <td class="num" style="color: {{ q.color }}">{{ "▲" if q.direction == "up" else ("▼" if q.direction == "down" else "■") }} {{ q.change }}</td>
+      <td class="num" style="color: {{ q.color }}">{{ q.change_pct }}</td></tr>
+  {% endfor %}
+  </table>
+  <div class="foot"><span></span><span>{{ data.time }}</span></div>
+{% else %}
   <div class="head"><span class="name">{{ data.name }}</span><span class="code">{{ data.code }}</span></div>
   <div class="price">{{ data.price }}</div>
   <div class="chg">{{ "▲" if data.direction == "up" else ("▼" if data.direction == "down" else "■") }} {{ data.change }}  {{ data.change_pct }}</div>
   <div class="foot"><span>H {{ data.high }} · L {{ data.low }} · {{ data.prev_label }} {{ data.prev_close }}</span><span>{{ data.time }}</span></div>
+{% endif %}
 </body></html>
