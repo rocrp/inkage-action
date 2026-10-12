@@ -1,0 +1,44 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { margin: 0; width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 26px 40px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
+  .label { font-size: 40px; font-weight: 900; }
+  .upd { font-size: 22px; font-weight: 700; }
+  .now { display: flex; align-items: center; height: 190px; }
+  .temp { font-size: 150px; font-weight: 900; line-height: 1; letter-spacing: -4px; color: {{ accent }}; white-space: nowrap; }
+  .temp small { font-size: 56px; letter-spacing: 0; vertical-align: top; }
+  .side { margin-left: 36px; }
+  .cond { font-size: 46px; font-weight: 900; line-height: 1.1; }
+  .meta { font-size: 28px; font-weight: 700; margin-top: 10px; }
+  .days { display: flex; border-top: 3px solid {{ ink.black }}; }
+  .d { flex: 1; text-align: center; padding-top: 10px; border-left: 2px solid {{ ink.black }}; }
+  .d:first-child { border-left: none; }
+  .wd { font-size: 26px; font-weight: 900; }
+  .wd span { font-size: 20px; font-weight: 700; }
+  .dc { font-size: 20px; font-weight: 700; height: 52px; line-height: 26px; margin: 4px 6px 0; overflow: hidden; }
+  .hl { font-size: 32px; font-weight: 900; }
+  .hl b { color: {{ accent }}; }
+  .pp { font-size: 22px; font-weight: 700; margin-top: 2px; }
+</style></head><body>
+  <div class="head"><span class="label">{{ data.label }}</span><span class="upd">{{ data.updated }}</span></div>
+  <div class="now">
+    <div class="temp">{{ data.temp }}<small>{{ data.temp_unit }}</small></div>
+    <div class="side">
+      <div class="cond">{{ data.condition }}</div>
+      <div class="meta">Humidity {{ data.humidity }}</div>
+      <div class="meta">Wind {{ data.wind }}</div>
+    </div>
+  </div>
+  <div class="days">
+    {%- for d in data.days %}
+    <div class="d">
+      <div class="wd">{{ d.weekday }} <span>{{ d.date }}</span></div>
+      <div class="dc">{{ d.condition }}</div>
+      <div class="hl"><b>{{ d.high }}</b> {{ d.low }}</div>
+      <div class="pp">Rain {{ d.precip }}</div>
+    </div>
+    {%- endfor %}
+  </div>
+</body></html>

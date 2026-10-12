@@ -50,7 +50,7 @@ def test_cli_validate_exits_nonzero_on_error(tmp_path):
         ("[defaults]\ntimezone = 'Mars/Olympus'\n[sources.calendar]\npanels = ['800x480-bwr']\n", "defaults.timezone"),
         ("[panels.x]\nwidth = 800\nheight = 480\npalette = 'cmyk'\n", "panels.x"),
         ("[panels.x]\npreset = '800x480-bwr'\nencoders = ['jpeg2000']\n", "panels.x.encoders"),
-        ("[sources.weather]\npanels = ['800x480-bwr']\n", "sources.weather"),
+        ("[sources.aurora]\npanels = ['800x480-bwr']\n", "sources.aurora"),
         ("[sources.calendar\npanels = []\n", "TOML syntax error"),
     ],
 )

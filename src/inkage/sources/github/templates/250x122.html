@@ -1,0 +1,18 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 4px 8px; overflow: hidden; }
+  .one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .repo { font-size: 15px; font-weight: 900; border-bottom: 2px solid {{ ink.black }}; padding-bottom: 1px; }
+  .stats { display: flex; align-items: baseline; gap: 10px; margin-top: 1px; white-space: nowrap; }
+  .stars { font-size: 34px; font-weight: 900; line-height: 1.1; color: {{ accent }}; }
+  .small { font-size: 13px; font-weight: 700; }
+  .msg { font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .date { font-size: 11px; font-weight: 700; }
+</style></head><body>
+  <div class="repo one">{{ data.repo }}</div>
+  <div class="stats"><span class="stars">★{{ "{:,}".format(data.stars) }}</span><span class="small">{{ "{:,}".format(data.forks) }} forks<br>{{ "{:,}".format(data.open_issues) }} issues</span></div>
+  <div class="msg one">{{ data.commit_message }}</div>
+  <div class="date one">{{ data.commit_date }} · {{ data.commit_author }}{% if data.release %} · {{ data.release }}{% endif %}</div>
+</body></html>

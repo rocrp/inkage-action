@@ -1,0 +1,27 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+{%- set today = data.days[0] -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { margin: 0; width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 4px 8px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; font-size: 16px; font-weight: 900;
+          border-bottom: 2px solid {{ ink.black }}; }
+  .head span { font-size: 12px; font-weight: 700; }
+  .row { display: flex; align-items: center; margin-top: 2px; }
+  .temp { font-size: 50px; font-weight: 900; line-height: 1.1; color: {{ accent }}; white-space: nowrap; }
+  .temp small { font-size: 20px; vertical-align: top; }
+  .side { margin-left: 10px; font-size: 14px; font-weight: 700; line-height: 1.25; overflow: hidden; }
+  .side .c { font-size: 17px; font-weight: 900; white-space: nowrap; }
+  .foot { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; white-space: nowrap; }
+</style></head><body>
+  <div class="head">{{ data.label }}<span>{{ data.updated[11:] }}</span></div>
+  <div class="row">
+    <div class="temp">{{ data.temp }}<small>{{ data.temp_unit }}</small></div>
+    <div class="side">
+      <div class="c">{{ data.condition }}</div>
+      <div>H {{ today.high }} L {{ today.low }}</div>
+      <div>Rain {{ today.precip }}</div>
+    </div>
+  </div>
+  <div class="foot">{% for d in data.days[1:4] %}<span>{{ d.weekday }} {{ d.high }}/{{ d.low }}</span>{% endfor %}</div>
+</body></html>

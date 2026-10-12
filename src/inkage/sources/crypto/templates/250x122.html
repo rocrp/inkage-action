@@ -1,0 +1,23 @@
+{%- set first = data.coins[0] -%}
+{%- macro arrow(d) %}{{ "▲" if d == "up" else ("▼" if d == "down" else "■") }}{% endmacro -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 4px 8px; overflow: hidden; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 16px; font-weight: 900; }
+  .time { font-size: 12px; font-weight: 700; }
+  .price { font-size: 34px; font-weight: 900; line-height: 1.1; white-space: nowrap; }
+  .chg { font-size: 15px; font-weight: 900; white-space: nowrap; }
+  .others { display: grid; grid-template-columns: {{ ["1fr", "1fr 1fr", "1fr 1fr 1fr"][(data.coins | length - 2) // 2] }}; column-gap: 6px; margin-top: 3px; padding-top: 2px;
+            border-top: 2px solid {{ ink.black }}; font-size: {{ 11 if data.coins | length > 5 else 12 }}px; font-weight: 700; line-height: 1.25; }
+  .others div { display: flex; justify-content: space-between; white-space: nowrap; }
+</style></head><body>
+  <div class="top"><span>{{ first.symbol }}/{{ data.quote }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
+  <div class="price">{{ first.price }}</div>
+  <div class="chg" style="color: {{ first.color }}">{{ arrow(first.direction) }} {{ first.change }} {{ first.change_pct }}</div>
+  {%- if data.coins | length > 1 %}
+  <div class="others">
+    {%- for c in data.coins[1:] %}<div><b>{{ c.symbol }}</b>{% if data.coins | length <= 3 %}<span>{{ c.price }}</span>{% endif %}<span style="color: {{ c.color }}">{{ c.change_pct }}</span></div>{% endfor %}
+  </div>
+  {%- endif %}
+</body></html>

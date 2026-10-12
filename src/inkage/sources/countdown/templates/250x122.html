@@ -1,0 +1,22 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+{%- set top = data.events[0] -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 6px 10px; }
+  .title { font-size: 22px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+           border-bottom: 2px solid {{ ink.black }}; padding-bottom: 2px; }
+  .mid { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+  .num { font-size: {{ 44 if top.days == 0 else (60 if top.days | abs < 1000 else 50) }}px; font-weight: 900;
+         line-height: 1.1; color: {{ accent }}; }
+  .unit { font-size: 20px; font-weight: 900; }
+  .date { font-size: 16px; font-weight: 700; }
+</style></head><body>
+  <div class="title">{{ top.title }}</div>
+  <div class="mid">
+    {%- if top.days == 0 %}<span class="num">TODAY</span>
+    {%- else %}<span class="num">{{ top.days | abs }}</span>
+    <span class="unit">{{ "day" if top.days | abs == 1 else "days" }}{{ " ago" if top.days < 0 else "" }}</span>{% endif %}
+  </div>
+  <div class="date">{{ top.date }} {{ top.weekday }}</div>
+</body></html>

@@ -1,0 +1,43 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 800px; height: 480px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 26px 40px 22px;
+         display: flex; flex-direction: column; }
+  .one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .head { border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
+  .repo { font-size: 40px; font-weight: 900; line-height: 1.15; }
+  .desc { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .stats { display: flex; margin: 14px 0 8px; }
+  .stat { flex: 1; min-width: 0; text-align: center; border-right: 2px solid {{ ink.black }}; }
+  .stat:last-child { border-right: none; }
+  .stat b { display: block; font-size: 68px; font-weight: 900; line-height: 1.1; }
+  .stat span { font-size: 22px; font-weight: 700; }
+  .stat.star b { color: {{ accent }}; }
+  .box { flex: 1; min-height: 0; border-top: 3px solid {{ ink.black }}; padding-top: 10px; }
+  .meta { font-size: 20px; font-weight: 700; }
+  .meta .tag { background: {{ ink.black }}; color: {{ ink.white }}; padding: 0 6px; margin-right: 8px; }
+  .msg { font-size: 30px; font-weight: 900; line-height: 1.25; margin-top: 4px; overflow: hidden;
+         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .foot { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; white-space: nowrap;
+          border-top: 2px solid {{ ink.black }}; padding-top: 8px; }
+  .foot b { color: {{ accent }}; }
+</style></head><body>
+  <div class="head">
+    <div class="repo one">{{ data.repo }}</div>
+    <div class="desc one">{{ data.description or data.language or "GitHub" }}{% if data.description and data.language %} · {{ data.language }}{% endif %}</div>
+  </div>
+  <div class="stats">
+    <div class="stat star"><b>{{ "{:,}".format(data.stars) }}</b><span>STARS</span></div>
+    <div class="stat"><b>{{ "{:,}".format(data.forks) }}</b><span>FORKS</span></div>
+    <div class="stat"><b>{{ "{:,}".format(data.open_issues) }}</b><span>OPEN ISSUES</span></div>
+  </div>
+  <div class="box">
+    <div class="meta one"><span class="tag">LAST COMMIT</span>{{ data.commit_sha }} · {{ data.commit_author }} · {{ data.commit_date }}</div>
+    <div class="msg">{{ data.commit_message }}</div>
+  </div>
+  <div class="foot">
+    <span>{% if data.release %}Release <b>{{ data.release }}</b> · {{ data.release_date }}{% else %}No release yet{% endif %}</span>
+    <span>pushed {{ data.pushed_at }}</span>
+  </div>
+</body></html>

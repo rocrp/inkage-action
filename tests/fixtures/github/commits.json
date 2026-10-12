@@ -1,0 +1,84 @@
+[
+  {
+    "sha": "088a1d7faa6d5aec5e1872be735bf7eac658dd1e",
+    "node_id": "C_kwDOVE7kjdoAKDA4OGExZDdmYWE2ZDVhZWM1ZTE4NzJiZTczNWJmN2VhYzY1OGRkMWU",
+    "commit": {
+      "author": {
+        "name": "RoCry",
+        "email": "crysheen@gmail.com",
+        "date": "2026-10-11T15:54:36Z"
+      },
+      "committer": {
+        "name": "RoCry",
+        "email": "crysheen@gmail.com",
+        "date": "2026-10-11T15:54:36Z"
+      },
+      "message": "fix: address review — tick-sized tolerance, Manifest version, carry Sidecar bytes, encoder changes\n\n- tolerance 4m so a late cron Run followed by an on-time one never skips a cycle (#2)\n- Manifest carries a schema version; other versions mean full regenerate (#5)\n- Sidecars carried byte-for-byte; regenerated Frames get a fresh next_due (#5)\n- a Panel whose encoders changed is regenerated (#10)\n- window days type-checked; convert accepts config Panels; Encoder type; tests use hand oracles\n- runner font setup: Debian package ships no Black weight",
+      "tree": {
+        "sha": "b8c523c0f6aee68ec99c5580c76b7223c641fc8f",
+        "url": "https://api.github.com/repos/rocrp/inkage-action/git/trees/b8c523c0f6aee68ec99c5580c76b7223c641fc8f"
+      },
+      "url": "https://api.github.com/repos/rocrp/inkage-action/git/commits/088a1d7faa6d5aec5e1872be735bf7eac658dd1e",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgK3nhDV4iheoS/shMJRCcUfnR6s\nW2j7zfCoQIRWHPMKUAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQEl9SdPzD0ICaCosw1PqnTXsQkZZ5j0i769dQQpMeDPeXVMapZFHnviUCspagYK9OF\nY+z1WimvPyuZn06WWZwww=\n-----END SSH SIGNATURE-----",
+        "payload": "tree b8c523c0f6aee68ec99c5580c76b7223c641fc8f\nparent 4a3f357850e5079e77053c22c1bee6dab32a4417\nauthor RoCry <crysheen@gmail.com> 1791734076 +0800\ncommitter RoCry <crysheen@gmail.com> 1791734076 +0800\n\nfix: address review — tick-sized tolerance, Manifest version, carry Sidecar bytes, encoder changes\n\n- tolerance 4m so a late cron Run followed by an on-time one never skips a cycle (#2)\n- Manifest carries a schema version; other versions mean full regenerate (#5)\n- Sidecars carried byte-for-byte; regenerated Frames get a fresh next_due (#5)\n- a Panel whose encoders changed is regenerated (#10)\n- window days type-checked; convert accepts config Panels; Encoder type; tests use hand oracles\n- runner font setup: Debian package ships no Black weight\n",
+        "verified_at": "2026-10-11T15:54:39Z"
+      }
+    },
+    "url": "https://api.github.com/repos/rocrp/inkage-action/commits/088a1d7faa6d5aec5e1872be735bf7eac658dd1e",
+    "html_url": "https://github.com/rocrp/inkage-action/commit/088a1d7faa6d5aec5e1872be735bf7eac658dd1e",
+    "comments_url": "https://api.github.com/repos/rocrp/inkage-action/commits/088a1d7faa6d5aec5e1872be735bf7eac658dd1e/comments",
+    "author": {
+      "login": "RoCry",
+      "id": 1117026,
+      "node_id": "MDQ6VXNlcjExMTcwMjY=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1117026?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/RoCry",
+      "html_url": "https://github.com/RoCry",
+      "followers_url": "https://api.github.com/users/RoCry/followers",
+      "following_url": "https://api.github.com/users/RoCry/following{/other_user}",
+      "gists_url": "https://api.github.com/users/RoCry/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/RoCry/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/RoCry/subscriptions",
+      "organizations_url": "https://api.github.com/users/RoCry/orgs",
+      "repos_url": "https://api.github.com/users/RoCry/repos",
+      "events_url": "https://api.github.com/users/RoCry/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/RoCry/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "RoCry",
+      "id": 1117026,
+      "node_id": "MDQ6VXNlcjExMTcwMjY=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1117026?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/RoCry",
+      "html_url": "https://github.com/RoCry",
+      "followers_url": "https://api.github.com/users/RoCry/followers",
+      "following_url": "https://api.github.com/users/RoCry/following{/other_user}",
+      "gists_url": "https://api.github.com/users/RoCry/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/RoCry/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/RoCry/subscriptions",
+      "organizations_url": "https://api.github.com/users/RoCry/orgs",
+      "repos_url": "https://api.github.com/users/RoCry/repos",
+      "events_url": "https://api.github.com/users/RoCry/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/RoCry/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "4a3f357850e5079e77053c22c1bee6dab32a4417",
+        "url": "https://api.github.com/repos/rocrp/inkage-action/commits/4a3f357850e5079e77053c22c1bee6dab32a4417",
+        "html_url": "https://github.com/rocrp/inkage-action/commit/4a3f357850e5079e77053c22c1bee6dab32a4417"
+      }
+    ]
+  }
+]

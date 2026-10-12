@@ -1,0 +1,31 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { margin: 0; width: 250px; height: 122px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 4px 8px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; font-weight: 900;
+          border-bottom: 2px solid {{ ink.black }}; }
+  .head span { font-size: 12px; font-weight: 700; }
+  .main { display: flex; align-items: center; margin-top: 4px; }
+  .sun { flex: 1; }
+  .r { display: flex; align-items: baseline; }
+  .k { width: 34px; font-size: 13px; font-weight: 700; }
+  .v { font-size: 30px; font-weight: 900; line-height: 1.1; }
+  .v.acc { color: {{ accent }}; }
+  .len { font-size: 13px; font-weight: 700; }
+  .moon { width: 64px; display: flex; flex-direction: column; align-items: center; }
+  .mname { font-size: 12px; font-weight: 700; margin-top: 2px; text-align: center; line-height: 1.1; }
+</style></head><body>
+  <div class="head">{{ data.label }}<span>{{ data.date.strftime("%a %m-%d") }}</span></div>
+  <div class="main">
+    <div class="sun">
+      <div class="r"><span class="k">Rise</span><span class="v acc">{{ data.sunrise.strftime("%H:%M") }}</span></div>
+      <div class="r"><span class="k">Set</span><span class="v">{{ data.sunset.strftime("%H:%M") }}</span></div>
+      <div class="len">Day {{ data.day_length }}</div>
+    </div>
+    <div class="moon">
+      {% with d = 50, border = 2 %}{% include "_moon.html" %}{% endwith %}
+      <div class="mname">{{ data.moon_phase }}</div>
+    </div>
+  </div>
+</body></html>

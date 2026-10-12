@@ -1,0 +1,9 @@
+{#- Pure-CSS moon of diameter `d`: lit half + an ellipse terminator whose width follows the lit fraction. -#}
+{%- set k = data.moon_lit -%}
+{%- set tw = (d * (1 - 2 * k)) | abs | round | int -%}
+<div style="position: relative; width: {{ d }}px; height: {{ d }}px; border-radius: 50%; overflow: hidden;
+            background: {{ ink.black }}; border: {{ border }}px solid {{ ink.black }}; box-sizing: border-box;">
+  <div style="position: absolute; top: 0; bottom: 0; width: 50%; {{ 'right' if data.moon_waxing else 'left' }}: 0; background: {{ ink.white }};"></div>
+  <div style="position: absolute; top: 0; bottom: 0; left: 50%; width: {{ tw }}px; margin-left: -{{ tw // 2 }}px; border-radius: 50%;
+              background: {{ ink.white if k > 0.5 else ink.black }};"></div>
+</div>

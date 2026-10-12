@@ -1,0 +1,32 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+{%- set n = data["items"] | length -%}
+{%- set cols = 2 if n > 4 else 1 -%}
+{%- set rows = ((n + cols - 1) // cols) -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { width: 800px; height: 480px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 22px 32px 16px;
+         display: flex; flex-direction: column; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }};
+          padding-bottom: 6px; white-space: nowrap; }
+  .label { font-size: 34px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; }
+  .time { font-size: 20px; font-weight: 700; margin-left: 16px; }
+  .list { flex: 1; min-height: 0; display: grid; grid-auto-flow: column; column-gap: 28px;
+          grid-template-columns: repeat({{ cols }}, minmax(0, 1fr)); grid-template-rows: repeat({{ rows }}, minmax(0, 1fr)); }
+  .item { display: flex; gap: 10px; align-items: flex-start; padding-top: 8px; border-bottom: 2px solid {{ ink.black }}; min-height: 0; overflow: hidden; }
+  .num { font-size: {{ 34 if cols == 2 else 44 }}px; font-weight: 900; line-height: 1; color: {{ accent }}; width: {{ 30 if cols == 2 else 40 }}px; }
+  .body { flex: 1; min-width: 0; }
+  .title { font-size: {{ 22 if cols == 2 else 26 }}px; font-weight: 900; line-height: 1.2; overflow: hidden;
+           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .meta { font-size: {{ 15 if cols == 2 else 16 }}px; font-weight: 700; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style></head><body>
+  <div class="head"><span class="label">{{ data.label }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
+  <div class="list">
+  {%- for it in data["items"] %}
+    <div class="item"><div class="num">{{ loop.index }}</div><div class="body">
+      <div class="title">{{ it.title }}</div>
+      <div class="meta">{% if it.score is not none %}{{ it.score }} pts · {% endif %}{{ it.source }}{% if it.time %} · {{ it.time }}{% endif %}</div>
+    </div></div>
+  {%- endfor %}
+  </div>
+</body></html>

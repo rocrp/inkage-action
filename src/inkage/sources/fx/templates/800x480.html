@@ -1,0 +1,25 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+{%- set row_h = (360 // data.rates | length) if data.rates | length > 3 else 120 -%}
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  body { margin: 0; width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
+         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 26px 40px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
+  .title { font-size: 40px; font-weight: 900; }
+  .date { font-size: 22px; font-weight: 700; }
+  .row { display: flex; align-items: center; height: {{ row_h }}px; border-bottom: 2px solid {{ ink.black }}; }
+  .row:last-child { border-bottom: none; }
+  .sym { width: 150px; font-size: {{ [row_h * 0.45, 52] | min | int }}px; font-weight: 900; }
+  .rate { flex: 1; font-size: {{ [row_h * 0.62, 72] | min | int }}px; font-weight: 900; letter-spacing: -1px; }
+  .chg { width: 250px; text-align: right; font-size: {{ [row_h * 0.27, 30] | min | int }}px; font-weight: 900; line-height: 1.2; }
+  .chg.down { color: {{ accent }}; }
+</style></head><body>
+  <div class="head"><span class="title">1 {{ data.base }} =</span><span class="date">ECB {{ data.date }} vs {{ data.prev_date }}</span></div>
+  {%- for r in data.rates %}
+  <div class="row">
+    <div class="sym">{{ r.symbol }}</div>
+    <div class="rate">{{ r.rate }}</div>
+    <div class="chg {{ r.direction }}">{{ "▲" if r.direction == "up" else ("▼" if r.direction == "down" else "■") }} {{ r.change }}<br>{{ r.change_pct }}</div>
+  </div>
+  {%- endfor %}
+</body></html>
