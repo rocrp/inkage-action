@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
@@ -109,12 +110,21 @@ def sidecar_bytes(entry: Entry) -> bytes:
 
 
 def http_getter(site_url: str, timeout: float = 20.0) -> Getter:
-    """Getter over the live Site. 404 and network errors mean "absent"; other statuses fail."""
+    """Read the live Site, retrying temporary gateway errors before failing.
+
+    404 and network errors mean "absent"; other statuses fail.
+    """
     client = httpx.Client(base_url=site_url.rstrip("/") + "/", timeout=timeout, follow_redirects=True)
 
     def get(path: str) -> bytes | None:
         try:
             resp = client.get(path, headers={"Cache-Control": "no-cache"})
+            for delay in (1, 2):
+                if resp.status_code not in (502, 503, 504):
+                    break
+                logger.warning(f"previous Site returned {resp.status_code} for {path}; retrying")
+                time.sleep(delay)
+                resp = client.get(path, headers={"Cache-Control": "no-cache"})
         except httpx.TransportError as e:
             logger.warning(f"previous Site unreachable for {path}: {e}")
             return None
