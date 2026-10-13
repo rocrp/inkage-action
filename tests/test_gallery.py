@@ -44,6 +44,31 @@ def test_heartbeat_without_any_next_due():
     assert "no Run scheduled" in gallery_html(only_failed)
 
 
+def test_retry_heartbeat_preserves_overdue_frame_timestamp():
+    page = gallery_html(
+        Manifest(
+            RUN,
+            [
+                Entry(
+                    "weather",
+                    "800x480-bwr",
+                    "weather/800x480-bwr.png",
+                    "cc",
+                    WX_GEN,
+                    "2026-10-11T23:00:00Z",
+                    "upstream down",
+                    retry_at="2026-10-12T00:30:00Z",
+                ),
+            ],
+        )
+    )
+    heartbeat = re.search(r'<p class="fresh heartbeat">.*?</p>', page)[0]
+    assert re.findall(r'datetime="([^"]*)"', heartbeat) == [RUN, "2026-10-12T00:30:00Z"]
+    freshness = re.search(r"<p class=fresh>.*?</p>", page)[0]
+    assert re.findall(r'datetime="([^"]*)"', freshness) == [WX_GEN, "2026-10-11T23:00:00Z"]
+    assert "next retry 2026-10-12T00:30:00Z" in page
+
+
 def test_gallery_has_no_url_code_and_only_relative_refs():
     page = gallery_html(MANIFEST)
     assert "<code>" not in page

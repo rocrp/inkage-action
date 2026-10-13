@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+body { width:800px; height:480px; box-sizing:border-box; padding:20px 28px 14px;
+  color:{{ ink.black }}; background:{{ ink.white }}; font-family:Georgia,"Noto Serif CJK SC",serif; }
+.work { width:100%; height:320px; display:flex; justify-content:center; align-items:center; }
+.work img { width:100%; height:100%; object-fit:contain; }
+.caption { border-top:1px solid {{ ink.black }}; margin-top:14px; padding-top:10px; }
+.title { font-size:22px; font-weight:bold; line-height:1.15; }
+.artist { margin-top:5px; font:16px/1.2 Arial,sans-serif; }
+.credit { margin-top:5px; font:11px/1.1 Arial,sans-serif; letter-spacing:.5px; }
+</style></head><body>
+<div class="work"><img src="{{ data.image_uri }}" alt="{{ data.title }}"></div>
+<div class="caption"><div class="title">{{ data.title }}</div>
+<div class="artist">{{ data.artist }} · {{ data.date }}</div>
+<div class="credit">{{ data.credit }}</div></div>
+</body></html>

@@ -110,3 +110,53 @@ def test_e2e_frame_size_and_palette_count(monkeypatch, panel, size):
     png = Image.open(io.BytesIO(png_bytes(asyncio.run(go()))))
     assert png.size == size
     assert len(png.getpalette() or []) == 3 * 3
+
+
+def hourly_capture():
+    return json.loads((FIX / "open_meteo_hourly_shanghai.json").read_text())
+
+
+def test_hourly_capture_selects_by_location_instant_and_rain_interval(monkeypatch):
+    # Real capture 2026-10-13. At 2026-10-14 08:20 Shanghai (00:20 UTC), upcoming
+    # endpoints 09..14 carry temperatures 22.4,23.2,23.8,24.0,24.2,24.1 and rain 1,1,2,3,4,4%.
+    sc = source_config(layout="hourly")
+    now = datetime(2026, 10, 14, 0, 20, tzinfo=ZoneInfo("UTC"))
+    weather = module(sc)
+    hours = weather["parse_hourly"](hourly_capture(), now)
+    assert hours == [
+        {"time": "09:00", "interval": "08–09", "temp": "22°", "precip": "1%", "amount": "0.0"},
+        {"time": "10:00", "interval": "09–10", "temp": "23°", "precip": "1%", "amount": "0.0"},
+        {"time": "11:00", "interval": "10–11", "temp": "24°", "precip": "2%", "amount": "0.0"},
+        {"time": "12:00", "interval": "11–12", "temp": "24°", "precip": "3%", "amount": "0.0"},
+        {"time": "13:00", "interval": "12–13", "temp": "24°", "precip": "4%", "amount": "0.0"},
+        {"time": "14:00", "interval": "13–14", "temp": "24°", "precip": "4%", "amount": "0.0"},
+    ]
+    # A second captured interval has actual 0.1 mm precipitation, rather than only dry values.
+    rainy = weather["parse_hourly"](hourly_capture(), datetime(2026, 10, 16, 23, 20, tzinfo=SH))
+    assert [(h["interval"], h["amount"]) for h in rainy[:4]] == [
+        ("23–00", "0.1"),
+        ("00–01", "0.1"),
+        ("01–02", "0.1"),
+        ("02–03", "0.0"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("damage", "message"),
+    [
+        (lambda r: r.pop("hourly"), "missing or malformed times"),
+        (lambda r: r["hourly"]["precipitation_probability"].pop(), "mismatched columns"),
+        (lambda r: r["hourly"]["precipitation_probability"].__setitem__(12, None), "precipitation_probability"),
+        (lambda r: r["hourly"]["precipitation"].__setitem__(12, -1), "invalid precipitation"),
+    ],
+)
+def test_hourly_broken_forecasts_raise(monkeypatch, damage, message):
+    raw = hourly_capture()
+    damage(raw)
+    with pytest.raises(RuntimeError, match=message):
+        fetched(monkeypatch, source_config(layout="hourly"), raw, datetime(2026, 10, 13, 11, 20, tzinfo=SH))
+
+
+def test_unknown_layout_raises(monkeypatch):
+    with pytest.raises(RuntimeError, match="layout must be daily or hourly"):
+        fetched(monkeypatch, source_config(layout="week"), capture(), OBSERVED)

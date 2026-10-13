@@ -1,0 +1,21 @@
+<svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" width="{{ 104 if data.wall.compact else 730 }}" height="{{ 56 if data.wall.compact else 205 }}" viewBox="0 0 {{ 104 if data.wall.compact else 730 }} {{ 56 if data.wall.compact else 205 }}">
+<defs>
+  <pattern id="level0" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="white"/></pattern>
+  <pattern id="level1" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="{{ ink.yellow if 'yellow' in panel.inks else ink.white }}"/><rect width="1" height="1" fill="black"/></pattern>
+  <pattern id="level2" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="white"/><path d="M-1 1L1 -1M0 4L4 0M3 5L5 3" stroke="{{ ink.blue if 'blue' in panel.inks else ink.black }}" stroke-width="1.5"/></pattern>
+  <pattern id="level3" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="{{ ink.green if 'green' in panel.inks else ink.black }}"/><path d="M0 0H4" stroke="white" stroke-width="1"/></pattern>
+  <pattern id="level4" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="{{ ink.red if 'red' in panel.inks else ink.black }}"/></pattern>
+</defs>
+{% if data.wall.isometric %}
+  {% for cell in data.wall.cells %}<g><title>{{ cell.date }}: {{ cell.count }} contributions</title>
+  {% for side in cell.sides %}<polygon points="{{ side }}" fill="white" stroke="black" stroke-width="0.75"/>{% endfor %}
+  <polygon points="{{ cell.top }}" fill="url(#level{{ cell.level }})" stroke="black" stroke-width="0.75"/></g>{% endfor %}
+  <text x="12" y="201" font-size="15" font-weight="700">{{ data.start }} → {{ data.end }} · weeks left to right; Sun → Sat diagonally</text>
+{% else %}
+  {% if not data.wall.compact %}
+  {% for month in data.wall.months %}<text x="{{ month.x }}" y="17" font-size="15" font-weight="700">{{ month.label }}</text>{% endfor %}
+  {% for label, y in [('Mon', 65), ('Wed', 113), ('Fri', 161)] %}<text x="0" y="{{ y }}" font-size="12" font-weight="700">{{ label }}</text>{% endfor %}
+  {% endif %}
+  {% for cell in data.wall.cells %}<rect x="{{ cell.x }}" y="{{ cell.y }}" width="{{ 6 if data.wall.compact else 10 }}" height="{{ 6 if data.wall.compact else 20 }}" fill="url(#level{{ cell.level }})" stroke="black" stroke-width="{{ 0.5 if data.wall.compact else 0.7 }}"><title>{{ cell.date }}: {{ cell.count }} contributions</title></rect>{% endfor %}
+{% endif %}
+</svg>

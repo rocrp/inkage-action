@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ data.language }}"><head><meta charset="utf-8"><style>
+body { width:250px; height:122px; box-sizing:border-box; padding:6px 9px;
+  color:{{ ink.black }}; background:{{ ink.white }}; display:flex; flex-direction:column;
+  font-family:Georgia,"Noto Serif CJK SC","Songti SC",serif; }
+header { display:flex; justify-content:space-between; border-bottom:1px solid {{ ink.black }}; padding-bottom:3px;
+  font:8px Arial,sans-serif; letter-spacing:1px; }
+main { flex:1; display:flex; flex-direction:column; justify-content:center; }
+h1 { margin:0 0 4px; font-size:13px; line-height:1.1; }
+.line { font-size:{{ 13 if data.language == 'zh' else 10 }}px; line-height:1.25; white-space:nowrap; }
+footer { display:flex; justify-content:space-between; gap:4px; border-top:1px solid {{ ink.black }};
+  padding-top:3px; font:8px/1.1 Arial,"Noto Sans CJK SC","PingFang SC",sans-serif; }
+</style></head><body>
+<header><span>DAILY POETRY</span><span>{{ '中文' if data.language == 'zh' else 'ENGLISH' }}</span></header>
+<main><h1>{{ data.title }}</h1>{% for line in data.lines %}<div class="line">{{ line }}</div>{% endfor %}</main>
+<footer><span>{{ data.author }}</span><span>{{ data.source_label }}</span></footer>
+</body></html>

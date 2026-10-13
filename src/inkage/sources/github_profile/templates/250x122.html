@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body { width:250px; height:122px; box-sizing:border-box; padding:7px 9px; background:white; color:black; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
+.head { display:flex; gap:6px; align-items:center; height:28px; border-bottom:2px solid black; padding-bottom:4px; }
+img { width:26px; height:26px; border:1px solid black; }
+.name { font-size:17px; font-weight:900; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.body { display:flex; justify-content:space-between; margin-top:7px; }
+.number { font-size:25px; line-height:27px; font-weight:900; color:{{ ink.red if 'red' in panel.inks else ink.black }}; }
+.label { font-size:10px; font-weight:800; }
+.annual { font-size:10px; line-height:16px; font-weight:700; }
+.foot { font-size:9px; font-weight:700; margin-top:4px; white-space:nowrap; }
+</style></head><body>
+<div class="head"><img src="{{ data.avatar }}" alt=""><span class="name">@{{ data.username }}</span></div>
+<div class="body"><div><div class="number">{{ '{:,}'.format(data.recent_total) }}</div><div class="label">RECENT TOTAL</div><div class="annual">{{ '{:,}'.format(data.total) }} annual</div></div>{% include 'wall.html' %}</div>
+<div class="foot">{{ data.recent_start }} → {{ data.end }} · GitHub UTC</div>
+</body></html>

@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body { width:800px; height:480px; box-sizing:border-box; padding:28px 35px 14px; background:white; color:black; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
+.header { display:flex; gap:20px; align-items:center; height:86px; }
+.avatar { width:82px; height:82px; border:2px solid black; object-fit:cover; }
+.identity { flex:1; min-width:0; }
+.name { font-size:36px; line-height:1.1; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.handle { font-size:21px; font-weight:700; margin-top:6px; }
+.mark { font-size:14px; letter-spacing:1.3px; font-weight:800; text-align:right; align-self:flex-start; margin-top:5px; }
+.bio { font-size:18px; line-height:22px; height:22px; margin-top:8px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.stats { display:flex; align-items:baseline; gap:30px; margin:10px 0 10px; padding-bottom:11px; border-bottom:3px solid black; }
+.main { margin-right:auto; }
+.number { font-size:38px; line-height:1; font-weight:900; color:{{ ink.red if 'red' in panel.inks else ink.black }}; }
+.stats b { font-size:25px; font-weight:900; }
+.label { font-size:14px; font-weight:800; margin-left:5px; }
+.wall { height:205px; }
+.foot { border-top:2px solid black; padding-top:10px; display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; }
+</style></head><body>
+<div class="header"><img class="avatar" src="{{ data.avatar }}" alt=""><div class="identity"><div class="name">{{ data.name }}</div><div class="handle">@{{ data.username }}</div></div><div class="mark">GITHUB<br>{{ 'CONTRIBUTION LANDSCAPE' if data.wall.isometric else 'PUBLIC PROFILE' }}</div></div>
+<div class="bio">{{ data.bio or 'Public GitHub contributions' }}</div>
+<div class="stats"><div class="main"><span class="number">{{ '{:,}'.format(data.total) }}</span><span class="label">CONTRIBUTIONS</span></div><div><b>{{ '{:,}'.format(data.repos) }}</b><span class="label">REPOS</span></div><div><b>{{ '{:,}'.format(data.followers) }}</b><span class="label">FOLLOWERS</span></div></div>
+<div class="wall">{% include 'wall.html' %}</div>
+<div class="foot"><span>{% if data.wall.isometric %}Height: daily contributions · logarithmic scale{% else %}{{ data.start }} → {{ data.end }}{% endif %}</span><span>GitHub UTC cutoff · {{ data.end }}</span></div>
+<div style="font-size:11px; margin-top:5px; display:flex; justify-content:space-between"><span>Relative activity: empty → dots → diagonal → dense → solid</span><span>May include anonymized private contributions</span></div>
+</body></html>

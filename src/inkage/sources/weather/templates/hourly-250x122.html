@@ -1,0 +1,13 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html><html><head><meta charset="utf-8"><style>
+body { margin:0; width:250px; height:122px; padding:4px 8px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
+header { display:flex; justify-content:space-between; align-items:baseline; font-size:16px; font-weight:900; border-bottom:2px solid; }
+header span { font-size:11px; } .current { font-size:14px; font-weight:900; margin:3px 0; } .current b { color:{{ accent }}; }
+.hours { display:flex; } .hour { flex:1; text-align:center; border-left:1px solid; font-size:13px; font-weight:900; } .hour:first-child { border:0; }
+.rain { font-size:11px; font-weight:700; } footer { font-size:9px; font-weight:700; margin-top:3px; }
+</style></head><body>
+<header>{{ data.label }}<span>{{ data.updated[11:] }} · next 3h</span></header>
+<div class="current"><b>{{ data.temp }}{{ data.temp_unit }}</b> · {{ data.condition }}</div>
+<div class="hours">{% for h in data.hours[:3] %}<div class="hour">{{ h.interval }}h<div>{{ h.temp }}</div><div class="rain">{{ h.precip }} · {{ h.amount }} mm</div></div>{% endfor %}</div>
+<footer>Temp at end · Rain per interval · Open-Meteo</footer>
+</body></html>

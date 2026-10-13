@@ -60,6 +60,12 @@ def plan(config: Config, previous: Manifest | None, now: datetime) -> list[Decis
     decisions = []
     for sc, panel in config.pairs():
         entry = prev.get((sc.id, panel.id))
+        if entry and entry.error and (retry := parse_iso(entry.retry_at)):
+            due = now >= retry
+            next_due = sc.schedule.next_due(now, sc.tz) if due else retry
+            reason = "retry due" if due else "waiting for retry"
+            decisions.append(Decision(sc, panel, due, reason, entry, next_due))
+            continue
         last = parse_iso(entry.generated_at) if entry else None
         due, reason = sc.schedule.is_due(now, last, sc.tz)
         if not due and entry and set(entry.encoders) != set(panel.encoders):
@@ -114,8 +120,17 @@ async def run(config: Config, get: Getter, out: Path, now: datetime, fonts_dir: 
         files.update(got)  # type: ignore[arg-type]
         return True
 
+    errors: dict[tuple[str, str], str] = {}
     due: list[Decision] = []
     for d in decisions:
+        if not d.due and (old := d.previous) and (error := old.error) and old.retry_at:
+            # A first-attempt failure has no PNG. Its error Sidecar still carries
+            # until retry_at; absent files must not cause an early network retry.
+            kept = old if old.sha256 and carry(old) else replace(old, sha256=None, encoders={})
+            entries[old.key] = kept
+            errors[old.key] = error
+            files[sidecar_path(*old.key)] = sidecar_bytes(kept)
+            continue
         if not d.due and d.previous and d.previous.sha256 and carry(d.previous):
             entries[d.previous.key] = d.previous
         else:
@@ -124,8 +139,6 @@ async def run(config: Config, get: Getter, out: Path, now: datetime, fonts_dir: 
                 d.next_due = d.source.schedule.next_due(now, d.source.tz)
             due.append(d)
 
-    errors: dict[tuple[str, str], str] = {}
-
     def fail(sc: SourceConfig, d: Decision, error: str) -> None:
         """Keep the previous Frame (if any) and record the error in its entry."""
         key = (sc.id, d.panel.id)
@@ -133,7 +146,11 @@ async def run(config: Config, get: Getter, out: Path, now: datetime, fonts_dir: 
         logger.error(f"{sc.id}/{d.panel.id}: {error}")
         old = d.previous
         kept = old if old and old.sha256 and carry(old) else None
-        entries[key] = replace(kept, error=error) if kept else _failed_entry(sc, d.panel, error)
+        entries[key] = (
+            replace(kept, error=error, retry_at=iso(d.next_due))
+            if kept
+            else _failed_entry(sc, d.panel, error, d.next_due)
+        )
         files[sidecar_path(*key)] = sidecar_bytes(entries[key])
 
     async with Renderer(fonts_dir) as renderer:
@@ -170,7 +187,7 @@ def _describe(e: Exception) -> str:
     return f"{type(e).__name__}: {e}"
 
 
-def _failed_entry(sc: SourceConfig, panel: Panel, error: str) -> Entry:
+def _failed_entry(sc: SourceConfig, panel: Panel, error: str, retry_at: datetime | None) -> Entry:
     return Entry(
         source=sc.id,
         panel=panel.id,
@@ -179,6 +196,7 @@ def _failed_entry(sc: SourceConfig, panel: Panel, error: str) -> Entry:
         generated_at=None,
         next_due=None,
         error=error,
+        retry_at=iso(retry_at),
     )
 
 

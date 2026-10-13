@@ -1,3 +1,6 @@
+{% if params.layout == "hourly" %}
+{% include "hourly-250x122.html" %}
+{% else %}
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 {%- set today = data.days[0] -%}
 <!doctype html>
@@ -25,3 +28,5 @@
   </div>
   <div class="foot">{% for d in data.days[1:4] %}<span>{{ d.weekday }} {{ d.high }}/{{ d.low }}</span>{% endfor %}</div>
 </body></html>
+
+{% endif %}

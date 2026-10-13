@@ -53,7 +53,7 @@ A complete example lives in [`examples/consumer/`](examples/consumer/).
 
 ### Custom Sources
 
-Put each Source in `sources/<name>/` and pass `sources_dir: sources`. Names must not collide with built-in Sources (`calendar`, `index`, `stock`); a collision fails validation.
+Put each Source in `sources/<name>/` and pass `sources_dir: sources`. Names must not collide with any built-in Source; a collision fails validation.
 
 - **Template-only**: `sources/<name>/templates/<w>x<h>.html` (Jinja2). Supported sizes come from the file names. Set `schedule` in the config.
 - **Python**: add `sources/<name>/source.py` with one `Source` subclass:
@@ -119,18 +119,26 @@ Built-in Sources (all key-less; every one has 800×480 and 250×122 layouts unle
 | `index` | China indices (up = red); several `symbols` = a Watchlist table | 5 min 09:30–15:00 Mon–Fri Asia/Shanghai, else 6 h | `symbols` (Tencent codes: `sh000300` CSI 300, `sh000001` SSE, `sz399006` ChiNext), `label` (single symbol only), `max_age_hours` |
 | `stock` | US equities (up = green or black, down = red); Watchlist as above | 5 min 09:30–16:00 Mon–Fri America/New_York, else 12 h | `symbols`, `label`, `max_age_hours` |
 | `crypto` | Kraken spot prices, change since today's open, 24 h range; up to 6 coins | every 5 min, 24/7 | `symbols` (`BTC`, `ETH`, `SOL`, `DOGE`, …), `quote` (`USD`) |
-| `weather` | Open-Meteo current conditions + 5-day forecast | every 30 min | `latitude`, `longitude`, `label`, `units` (`celsius` / `fahrenheit`) |
+| `weather` | Open-Meteo current conditions + 5-day or next-hours forecast | every 30 min | `latitude`, `longitude`, `label`, `units` (`celsius` / `fahrenheit`), `layout` (`daily` / `hourly`) |
+| `air_quality` | CAMS/Open-Meteo model forecast: U.S. AQI, PM2.5/PM10, hourly trend | every 1 h | `latitude`, `longitude`, `label` |
 | `fx` | ECB rates via Frankfurter, change vs previous business day | every 6 h | `base`, `symbols` (1–6) |
 | `astro` | sunrise, sunset, dawn/dusk, day length, moon phase; offline (`astral`) | daily 00:05 | `latitude`, `longitude`, `label`; the Source's `timezone` must match the location |
 | `github` | repo stars, forks, issues, last commit, latest release | every 30 min | `repo` (`owner/name`); uses `GITHUB_TOKEN` when set |
+| `github_ci` | recent public GitHub Actions runs, explicit running / completed outcomes | every 15 min | `repo`, `branch` (empty = all), `count` (1–5); anonymous |
+| `github_profile` | public identity + contribution calendar; Profile or isometric wall | every 6 h | `username`, `layout` (`profile` / `isometric`); anonymous |
+| `status` | public Statuspage rollup, components and unresolved incidents | every 15 min | `url` (base URL; default GitHub Status), `label` |
 | `news` | Hacker News top stories, or any RSS/Atom feed | every 30 min | `feed` (`hn` or a URL), `count` (1–30), `label` |
+| `poetry` | complete public-domain short poems; offline selection with provenance | daily 00:10 | `language` (`mixed` / `en` / `zh`); six curated poems |
+| `art` | public-domain Met Museum painting, entire artwork retained with caption | daily 00:10 | `artwork_id` (0 = daily curated rotation; otherwise Met object ID) |
 | `countdown` | days until (or since) your events; offline | daily 00:05 | `events = [{ title, date, repeat = "yearly" \| "none" }]` |
 | `photo` | a photo cover-cropped to the Panel, Atkinson-dithered; any Preset size | daily 00:10 | `url` (empty = Bing's photo of the day) |
+
+[Detailed source notes and examples](docs/sources.md): contribution definitions, small-panel layouts, museum/poem provenance, anonymous API limits. The demo includes English and Chinese reading content; interface labels are English-first.
 
 ## Site
 
 ```
-manifest.json                   { generated_at, frames: [{source, panel, url, sha256, generated_at, next_due, error?, encoders}] }
+manifest.json                   { generated_at, frames: [{source, panel, url, sha256, generated_at, next_due, error?, retry_at?, encoders}] }
 index.html                      gallery
 <source>/<panel>.png            Frame (indexed PNG, Ink Order)
 <source>/<panel>.json           Sidecar: that Frame's Manifest entry
@@ -138,7 +146,7 @@ index.html                      gallery
 <source>/<panel>.pcim           Encoder output, when enabled
 ```
 
-Devices: fetch the Sidecar (or Manifest), compare `sha256`, download the PNG with `If-None-Match`, sleep until about `next_due` plus a minute (Run overhead; after a broken chain the cron's recovery takes hours). Every `url` is Site-relative: join it with the base you fetched the Manifest from, so a mirror of the Site works unchanged. A Source that fails keeps its previous Frame, gets `error` in its entry, and fails the workflow run after the Site is deployed.
+Devices: fetch the Sidecar (or Manifest), compare `sha256`, download the PNG with `If-None-Match`, sleep until about `retry_at` (if present) or `next_due` plus a minute (Run overhead; after a broken chain the cron's recovery takes hours). Every `url` is Site-relative: join it with the base you fetched the Manifest from, so a mirror of the Site works unchanged. A Source that fails keeps its previous Frame and original freshness timestamps, gets `error` and an independent scheduled `retry_at`, and fails the workflow run after the Site is deployed. A successful deployment still continues the Chain; retries wait for their due time, so a persistent upstream failure cannot trigger immediate redispatch loops.
 
 **pcim**: 16-byte little-endian header `"PCIM"`, version `1`, bpp `4`, palette count, reserved `0`, width u16, height u16, payload length u32; then 4bpp pixels, high nibble first, rows padded to a whole byte.
 

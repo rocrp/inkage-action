@@ -4,12 +4,14 @@ import asyncio
 import json
 import re
 import subprocess
-from datetime import datetime
+from dataclasses import replace
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from inkage.config import parse_config
 from inkage.run import RunResult, run
+from inkage.schedule import Schedule
 
 FIXTURES = Path(__file__).parent / "fixtures" / "sources"
 ROOT = Path(__file__).parent.parent
@@ -187,3 +189,87 @@ def test_adding_an_encoder_regenerates_a_carried_frame(tmp_path):
     result = do_run(with_pcim, site_getter(a), b, T1)
     assert result.decisions[0].reason == "encoders changed"
     assert (b / "daily/250x122-bwr.pcim").is_file()
+
+
+def test_failed_source_retries_independently_of_frame_freshness(tmp_path):
+    # Healthy frame at 08:00, outage at 08:31, another Source wakes at 08:36,
+    # retry fails at 09:01, and recovery occurs on the next retry at 09:31.
+    cfg = config()
+    flaky = next(sc for sc in cfg.sources if sc.id == "flaky")
+    cfg = replace(
+        cfg,
+        sources=tuple(
+            replace(sc, schedule=Schedule.parse({"every": "30m"})) if sc is flaky else sc for sc in cfg.sources
+        ),
+    )
+    flaky = next(sc for sc in cfg.sources if sc.id == "flaky")
+    sites = [tmp_path / str(i) for i in range(5)]
+    key = ("flaky", "250x122-bwr")
+    do_run(cfg, lambda _p: None, sites[0], T0)
+    original = (sites[0] / "flaky/250x122-bwr.png").read_bytes()
+    flaky.params["fail"] = True
+    failed = do_run(cfg, site_getter(sites[0]), sites[1], T0 + timedelta(minutes=31)).manifest.by_key()[key]
+    assert (failed.generated_at, failed.next_due, failed.retry_at) == (
+        "2026-10-12T00:00:00Z",
+        "2026-10-12T00:30:00Z",
+        "2026-10-12T01:01:00Z",
+    )
+
+    # Upstream would now succeed. Waiting must still skip it when the clock wakes.
+    flaky.params["fail"] = False
+    waiting = do_run(cfg, site_getter(sites[1]), sites[2], T0 + timedelta(minutes=36))
+    decision = next(d for d in waiting.decisions if d.source.id == "flaky")
+    assert (decision.due, decision.reason, decision.next_due.isoformat()) == (
+        False,
+        "waiting for retry",
+        "2026-10-12T01:01:00+00:00",
+    )
+    assert waiting.manifest.by_key()[key] == failed
+    assert not waiting.ok  # The unresolved upstream error remains visible.
+
+    flaky.params["fail"] = True
+    failed_again = do_run(cfg, site_getter(sites[2]), sites[3], T0 + timedelta(minutes=61)).manifest.by_key()[key]
+    assert (failed_again.generated_at, failed_again.next_due, failed_again.retry_at) == (
+        "2026-10-12T00:00:00Z",
+        "2026-10-12T00:30:00Z",
+        "2026-10-12T01:31:00Z",
+    )
+    assert (sites[3] / "flaky/250x122-bwr.png").read_bytes() == original
+
+    flaky.params["fail"] = False
+    recovered = do_run(cfg, site_getter(sites[3]), sites[4], T0 + timedelta(minutes=91)).manifest.by_key()[key]
+    assert (recovered.generated_at, recovered.next_due, recovered.error, recovered.retry_at) == (
+        "2026-10-12T01:31:00Z",
+        "2026-10-12T02:01:00Z",
+        None,
+        None,
+    )
+    assert "retry_at" not in recovered.to_json()
+
+
+def test_first_run_failure_has_retry_and_carries_without_a_png(tmp_path):
+    cfg = parse_config(
+        {"sources": {"flaky": {"panels": ["250x122-bwr"], "fail": True, "schedule": {"every": "30m"}}}},
+        sources_dir=FIXTURES,
+    )
+    a, b, c = (tmp_path / name for name in ("a", "b", "c"))
+    result = do_run(cfg, lambda _p: None, a, T0)
+    failed = result.manifest.frames[0]
+    assert (failed.generated_at, failed.next_due, failed.retry_at, failed.sha256) == (
+        None,
+        None,
+        "2026-10-12T00:30:00Z",
+        None,
+    )
+    cfg.sources[0].params["fail"] = False
+    waiting = do_run(cfg, site_getter(a), b, T0 + timedelta(minutes=5))
+    assert not waiting.decisions[0].due
+    assert (b / "flaky/250x122-bwr.json").read_bytes() == (a / "flaky/250x122-bwr.json").read_bytes()
+    assert not (b / "flaky/250x122-bwr.png").exists()
+    recovered = do_run(cfg, site_getter(b), c, T0 + timedelta(minutes=30)).manifest.frames[0]
+    assert (recovered.generated_at, recovered.next_due, recovered.error, recovered.retry_at) == (
+        "2026-10-12T00:30:00Z",
+        "2026-10-12T01:00:00Z",
+        None,
+        None,
+    )

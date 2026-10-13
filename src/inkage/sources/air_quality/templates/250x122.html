@@ -1,0 +1,17 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html><html><head><meta charset="utf-8"><style>
+body { margin:0; width:250px; height:122px; box-sizing:border-box; padding:4px 8px; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
+header { display:flex; justify-content:space-between; border-bottom:2px solid; font-size:14px; font-weight:900; line-height:17px; }
+header span { font-size:11px; } .row { display:flex; gap:10px; align-items:center; height:38px; }
+.score { font-size:40px; font-weight:900; color:{{ accent }}; line-height:1; }
+.info { font-size:12px; font-weight:900; line-height:1.2; } .pm { font-size:10px; line-height:11px; font-weight:700; white-space:nowrap; }
+.trend { line-height:11px; display:flex; justify-content:space-between; font-size:11px; font-weight:900; border-top:1px solid; padding-top:2px; }
+.trend span { display:flex; flex-direction:column; align-items:center; } .trend small { line-height:10px; font-size:9px; font-weight:700; }
+footer { line-height:10px; font-size:9px; font-weight:700; margin-top:3px; white-space:nowrap; }
+</style></head><body>
+<header>{{ data.label }}<span>{{ data.updated[11:] }} · U.S. AQI</span></header>
+<div class="row"><div class="score">{{ data.aqi }}</div><div class="info">{{ data.status }}</div></div>
+<div class="pm">PM2.5 {{ data.pm25 }} / PM10 {{ data.pm10 }} μg/m³</div>
+<div class="trend">{% for h in data.hours[:6] %}<span><small>{{ h.time }}h</small>{{ h.aqi }}</span>{% endfor %}</div>
+<footer>Model forecast · CAMS ENSEMBLE / Open-Meteo</footer>
+</body></html>

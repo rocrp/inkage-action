@@ -1,3 +1,6 @@
+{% if params.layout == "hourly" %}
+{% include "hourly-800x480.html" %}
+{% else %}
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
@@ -42,3 +45,5 @@
     {%- endfor %}
   </div>
 </body></html>
+
+{% endif %}

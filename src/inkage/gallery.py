@@ -31,7 +31,7 @@ STYLE = """<style>
 @media (prefers-color-scheme:dark){:root{--bg:#1b1b1a;--fg:#ececea;--card:#262624;--muted:#a3a39e;--err:#f2b8b5}}
 body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif}
 section{margin-bottom:24px} h2{font-size:16px;margin:0 0 4px}
-.fresh{margin:0 0 8px;color:var(--muted)} .overdue{color:var(--err);font-weight:600}
+.fresh,.retry{margin:0 0 8px;color:var(--muted)} .overdue{color:var(--err);font-weight:600}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
 figure{margin:0;padding:12px;background:var(--card);border-radius:8px}
 img{max-width:100%;image-rendering:pixelated;border:1px solid var(--muted)}
@@ -71,9 +71,11 @@ def _section(source: str, entries: list[Entry]) -> str:
     # All Panels of one Source share one Run's times, so the first entry speaks for the Source.
     head = entries[0]
     fresh = f"{_time(head.generated_at, 'generated')} · {_time(head.next_due, 'next')}"
+    retries = [e.retry_at for e in entries if e.retry_at]
+    retry = f"<p class=retry>{_time(min(retries), 'next retry')}</p>" if retries else ""
     cards = "".join(_card(e) for e in entries)
     return (
-        f"<section><h2>{escape(source)}</h2><p class=fresh>{fresh}</p>{_errors(entries)}"
+        f"<section><h2>{escape(source)}</h2><p class=fresh>{fresh}</p>{_errors(entries)}{retry}"
         f"<div class=grid>{cards}</div></section>"
     )
 
@@ -83,8 +85,8 @@ def gallery_html(manifest: Manifest) -> str:
     by_source: dict[str, list[Entry]] = {}
     for e in manifest.frames:
         by_source.setdefault(e.source, []).append(e)
-    # Earliest next_due is when the Chain's next Run is due (same rule as scripts/action-run.sh).
-    dues = [e.next_due for e in manifest.frames if e.next_due is not None]
+    # Same effective wake time as scripts/action-run.sh; Frame freshness remains independent.
+    dues = [wake for e in manifest.frames if (wake := e.retry_at or e.next_due)]
     next_run = _time(min(dues), "next Run") if dues else "no Run scheduled"
     heartbeat = (
         f'<p class="fresh heartbeat">{_time(manifest.generated_at, "Run")} · {next_run} · '

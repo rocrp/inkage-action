@@ -15,6 +15,8 @@ from inkage.source import Context, Source
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 DAYS = 5
+HOURS = 6
+HOURLY = ("temperature_2m", "precipitation_probability", "precipitation")
 MAX_AGE = timedelta(hours=3)
 CURRENT = ("temperature_2m", "relative_humidity_2m", "wind_speed_10m", "weather_code")
 DAILY = ("weather_code", "temperature_2m_max", "temperature_2m_min", "precipitation_probability_max")
@@ -61,15 +63,20 @@ class WeatherError(RuntimeError):
 class Weather(Source):
     schedule = Schedule.parse({"every": "30m"})
     dither = "threshold"
-    params = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai", "units": "celsius"}
+    params = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai", "units": "celsius", "layout": "daily"}
     fields = ("label", "condition", "temp", "humidity", "wind", "updated", "days")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:
         p = ctx.params
         if p["units"] not in UNITS:
             raise WeatherError(f"units must be one of {sorted(UNITS)}, got {p['units']!r}")
+        if p["layout"] not in ("daily", "hourly"):
+            raise WeatherError("layout must be daily or hourly")
         raw = await fetch_open_meteo(p["latitude"], p["longitude"], p["units"])
-        return {"label": p["label"], **parse_forecast(raw, ctx.now, p["units"])}
+        data = {"label": p["label"], **parse_forecast(raw, ctx.now, p["units"])}
+        if p["layout"] == "hourly":
+            data["hours"] = parse_hourly(raw, ctx.now)
+        return data
 
 
 async def fetch_open_meteo(latitude: float, longitude: float, units: str) -> dict[str, Any]:
@@ -79,6 +86,7 @@ async def fetch_open_meteo(latitude: float, longitude: float, units: str) -> dic
         "longitude": longitude,
         "current": ",".join(CURRENT),
         "daily": ",".join(DAILY),
+        "hourly": ",".join(HOURLY),
         "forecast_days": DAYS,
         "timezone": "auto",
         "temperature_unit": temp_unit,
@@ -98,7 +106,7 @@ def condition(code: Any) -> str:
 
 def _whole(block: dict[str, Any], key: str, where: str) -> int:
     """The value rounded half-up (26.5 -> 27, as people read thermometers); raise if absent."""
-    if not isinstance(value := block.get(key), int | float):
+    if not isinstance(value := block.get(key), int | float) or isinstance(value, bool) or not math.isfinite(value):
         raise WeatherError(f"Open-Meteo {where}.{key}: missing or not a number ({value!r})")
     return math.floor(value + 0.5)
 
@@ -140,3 +148,44 @@ def parse_forecast(raw: dict[str, Any], now: datetime, units: str) -> dict[str, 
         "updated": observed.strftime("%Y-%m-%d %H:%M"),
         "days": days,
     }
+
+
+def parse_hourly(raw: dict[str, Any], now: datetime) -> list[dict[str, str]]:
+    """Next six hourly endpoints; rain describes the hour ending at that time.
+
+    Open-Meteo ISO timestamps use its fixed utc_offset_seconds, including at DST.
+    Select by instant rather than the configured display zone or time-string order.
+    """
+    try:
+        tz = timezone(timedelta(seconds=raw["utc_offset_seconds"]))
+        hourly = raw["hourly"]
+        times = [datetime.fromisoformat(t).replace(tzinfo=tz) for t in hourly["time"]]
+    except (KeyError, TypeError, ValueError):
+        raise WeatherError("Open-Meteo hourly: missing or malformed times") from None
+    if any(b - a != timedelta(hours=1) for a, b in zip(times, times[1:], strict=False)):
+        raise WeatherError("Open-Meteo hourly: timestamps must be consecutive hours")
+    if bad := [k for k in HOURLY if not isinstance(hourly.get(k), list) or len(hourly[k]) != len(times)]:
+        raise WeatherError(f"Open-Meteo hourly: mismatched columns {bad}")
+    indices = [i for i, t in enumerate(times) if t > now][:HOURS]
+    if len(indices) != HOURS:
+        raise WeatherError(f"Open-Meteo hourly: fewer than {HOURS} upcoming hours")
+    hours = []
+    for i in indices:
+        row = {k: hourly[k][i] for k in HOURLY}
+        chance = _whole(row, "precipitation_probability", f"hourly[{i}]")
+        amount = row["precipitation"]
+        if not 0 <= chance <= 100:
+            raise WeatherError(f"Open-Meteo hourly[{i}]: probability outside 0..100")
+        if not isinstance(amount, int | float) or not math.isfinite(amount) or amount < 0:
+            raise WeatherError(f"Open-Meteo hourly[{i}]: invalid precipitation {amount!r}")
+        end = times[i]
+        hours.append(
+            {
+                "time": end.strftime("%H:%M"),
+                "interval": f"{(end - timedelta(hours=1)):%H}–{end:%H}",
+                "temp": f"{_whole(row, 'temperature_2m', f'hourly[{i}]')}°",
+                "precip": f"{chance}%",
+                "amount": f"{amount:.1f}",
+            }
+        )
+    return hours

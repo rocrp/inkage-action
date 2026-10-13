@@ -15,7 +15,7 @@ from inkage.encoders import ENCODERS
 
 MANIFEST = "manifest.json"
 # Bumped on any Manifest schema change; a previous Site with another version is treated as absent.
-MANIFEST_VERSION = 2
+MANIFEST_VERSION = 3
 
 # Fetch one Site-relative path from the previous Site; None when absent/unreachable.
 type Getter = Callable[[str], bytes | None]
@@ -58,6 +58,8 @@ class Entry:
     error: str | None = None
     # Encoder name -> {"url": ..., "sha256": ...}
     encoders: dict[str, dict[str, str]] = field(default_factory=dict)
+    # Next attempt after a failure; Frame freshness stays in generated_at/next_due.
+    retry_at: str | None = None
 
     @property
     def key(self) -> tuple[str, str]:
@@ -67,6 +69,8 @@ class Entry:
         data = asdict(self)
         if data["error"] is None:
             del data["error"]
+        if data["retry_at"] is None:
+            del data["retry_at"]
         return data
 
     @classmethod

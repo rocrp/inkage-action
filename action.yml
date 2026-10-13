@@ -29,7 +29,7 @@ outputs:
     description: "'true' when a Source failed at runtime (the Site was still written with its previous Frame)"
     value: ${{ steps.run.outputs.failed }}
   next_due:
-    description: Earliest next_due of any Frame (RFC 3339 UTC), empty when none is scheduled
+    description: Earliest effective retry_at or next_due across Frames (RFC 3339 UTC), empty when none is scheduled
     value: ${{ steps.run.outputs.next_due }}
 
 runs:

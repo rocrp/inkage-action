@@ -1,0 +1,15 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{width:800px;height:480px;box-sizing:border-box;padding:24px 32px;margin:0;background:{{ink.white}};color:{{ink.black}};font-family:"Noto Sans CJK SC","PingFang SC",sans-serif;display:flex;flex-direction:column}
+.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top{display:flex;justify-content:space-between;font-size:20px;font-weight:700}.top span{font-size:15px;letter-spacing:2px}
+h1{font-size:42px;line-height:1.1;margin:8px 0 2px;color:{{accent if data.alert else ink.black}}}.description{font-size:18px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;column-gap:24px;border-top:3px solid {{ink.black}};padding-top:7px}
+.component{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;height:31px;font-size:16px;font-weight:700}.component span{min-width:0}.component b{font-size:12px;flex-shrink:0}.affected{color:{{accent}}}
+.incident{margin-top:auto;border-top:2px solid {{ink.black}};padding-top:9px;font-size:17px}.incident b{font-size:14px;letter-spacing:1px}.foot{display:flex;justify-content:space-between;font-size:13px;margin-top:10px}
+</style></head><body>
+<div class="top"><b class="one">{{data.label}}</b><span>SERVICE STATUS</span></div>
+<h1>{{data.headline}}</h1><div class="description one">{{data.description}}</div>
+<div class="grid">{% for component in data.components[:12] %}<div class="component {% if component.severity %}affected{% endif %}"><span class="one">{{component.name}}</span><b>{{component.state|upper}}</b></div>{% endfor %}</div>
+<div class="incident"><b>{{data.incidents|length}} OPEN INCIDENT{% if data.incidents|length != 1 %}S{% endif %}</b><div class="one">{% if data.incidents %}{{data.incidents[0].name}}{% else %}No unresolved incidents reported{% endif %}</div></div>
+<div class="foot"><span>{{data.affected}} affected / {{data.components|length}} listed components{% if data.components|length > 12 %} · showing 12{% endif %}</span><span>Checked {{data.checked}}</span></div>
+</body></html>

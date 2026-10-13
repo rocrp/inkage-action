@@ -1,0 +1,20 @@
+{%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
+<!doctype html><html><head><meta charset="utf-8"><style>
+body { margin:0; width:800px; height:480px; padding:24px 36px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
+header { display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid; padding-bottom:8px; font-weight:900; }
+.place { font-size:38px; } .updated { font-size:21px; }
+.current { display:flex; gap:30px; align-items:center; height:150px; }
+.temp { font-size:112px; line-height:1; font-weight:900; color:{{ accent }}; } .temp small { font-size:40px; }
+.condition { font-size:34px; font-weight:900; } .meta { font-size:21px; font-weight:700; }
+.title { font-size:20px; font-weight:900; border-bottom:2px solid; padding-bottom:8px; }
+.hours { display:flex; margin-top:8px; } .hour { flex:1; text-align:center; border-left:2px solid; } .hour:first-child { border:0; }
+.time { font-size:22px; font-weight:900; } .degree { font-size:37px; font-weight:900; margin:5px 0; }
+.rain { font-size:22px; font-weight:700; line-height:1.4; }
+footer { font-size:16px; font-weight:700; margin-top:15px; }
+</style></head><body>
+<header><span class="place">{{ data.label }}</span><span class="updated">{{ data.updated }}</span></header>
+<div class="current"><div class="temp">{{ data.temp }}<small>{{ data.temp_unit }}</small></div><div><div class="condition">{{ data.condition }}</div><div class="meta">Humidity {{ data.humidity }} · Wind {{ data.wind }}</div></div></div>
+<div class="title">NEXT 6 HOURS · LOCAL TIME</div>
+<div class="hours">{% for h in data.hours %}<div class="hour"><div class="time">{{ h.interval }}h</div><div class="degree">{{ h.temp }}</div><div class="rain">{{ h.precip }}<br>{{ h.amount }} mm</div></div>{% endfor %}</div>
+<footer>Temperature at hour end · Rain chance / total for each interval · Open-Meteo</footer>
+</body></html>

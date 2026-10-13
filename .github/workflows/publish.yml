@@ -36,6 +36,7 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     outputs:
       next_due: ${{ steps.inkage.outputs.next_due }}
+      deployed: ${{ steps.deploy.outcome }}
     steps:
       - uses: actions/checkout@v5
 
@@ -80,7 +81,9 @@ jobs:
 
   chain:
     needs: publish
-    if: inputs.chain
+    # A Source failure is reported after deployment; it must not break refreshes for every Source.
+    # Still stop on cancellation or a failed/missing deployment.
+    if: ${{ !cancelled() && inputs.chain && needs.publish.outputs.deployed == 'success' }}
     runs-on: ubuntu-latest
     # Exactly one waiter at a time: a newer Run (push, cron, dispatch) replaces the one sleeping.
     concurrency:

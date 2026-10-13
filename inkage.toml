@@ -34,6 +34,16 @@ panels = ["800x480-bwr", "250x122-bwr"]
 label = "Shanghai"
 panels = ["800x480-bwr", "250x122-bwr"]
 
+[sources.weather-hourly]
+source = "weather"
+layout = "hourly"
+label = "Shanghai"
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.air_quality]
+label = "Shanghai"
+panels = ["800x480-bwr", "250x122-bwr"]
+
 [sources.fx]
 base = "USD"
 symbols = ["CNY", "EUR", "JPY", "GBP"]
@@ -47,9 +57,47 @@ panels = ["800x480-bwr"]
 repo = "rocrp/inkage-action"
 panels = ["800x480-bwr"]
 
+[sources.github_ci]
+repo = "rocrp/inkage-action"
+branch = "main"
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.status]
+url = "https://www.githubstatus.com"
+panels = ["800x480-bwr", "250x122-bwr"]
+
+[sources.github_profile]
+username = "RoCry"
+panels = ["800x480-bwr", "250x122-bw"]
+
+[sources.github-wall]
+source = "github_profile"
+username = "RoCry"
+layout = "isometric"
+panels = ["800x480-bw", "800x480-spectra6"]
+
 [sources.news]
 feed = "hn"
 panels = ["800x480-bwr"]
+
+[sources.news-zh]
+source = "news"
+feed = "https://sspai.com/feed"
+label = "少数派"
+panels = ["800x480-bwr"]
+
+[sources.poetry-en]
+source = "poetry"
+language = "en"
+panels = ["800x480-bwr", "250x122-bw"]
+
+[sources.poetry-zh]
+source = "poetry"
+language = "zh"
+panels = ["800x480-bwr", "250x122-bw"]
+
+[sources.art]
+panels = ["800x480-spectra6", "250x122-bw"]
 
 [sources.countdown]
 events = [

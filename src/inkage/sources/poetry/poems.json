@@ -1,0 +1,62 @@
+[
+  {
+    "id": "rain",
+    "language": "en",
+    "title": "Rain",
+    "author": "Robert Louis Stevenson",
+    "lines": ["The rain is raining all around,", "It falls on field and tree,", "It rains on the umbrellas here,", "And on the ships at sea."],
+    "source": "https://www.gutenberg.org/cache/epub/25609/pg25609-images.html#RAIN",
+    "edition": "A Child's Garden of Verses (1905)",
+    "source_label": "Project Gutenberg"
+  },
+  {
+    "id": "quiet-night",
+    "language": "zh",
+    "title": "静夜思",
+    "author": "李白",
+    "lines": ["床前明月光，", "疑是地上霜。", "举头望明月，", "低头思故乡。"],
+    "source": "https://zh.wikisource.org/w/index.php?title=靜夜思&oldid=8747585",
+    "edition": "唐诗三百首 · Simplified Chinese transcription",
+    "source_label": "Wikisource"
+  },
+  {
+    "id": "happy-thought",
+    "language": "en",
+    "title": "Happy Thought",
+    "author": "Robert Louis Stevenson",
+    "lines": ["The world is so full of a number of things,", "I'm sure we should all be as happy as kings."],
+    "source": "https://www.gutenberg.org/cache/epub/25609/pg25609-images.html#HAPPY_THOUGHT",
+    "edition": "A Child's Garden of Verses (1905)",
+    "source_label": "Project Gutenberg"
+  },
+  {
+    "id": "stork-tower",
+    "language": "zh",
+    "title": "登鹳雀楼",
+    "author": "王之涣",
+    "lines": ["白日依山尽，", "黄河入海流。", "欲穷千里目，", "更上一层楼。"],
+    "source": "https://zh.wikisource.org/w/index.php?title=登鸛雀樓_(王之渙)&oldid=2648160",
+    "edition": "全唐诗 · Simplified Chinese transcription",
+    "source_label": "Wikisource"
+  },
+  {
+    "id": "eternity",
+    "language": "en",
+    "title": "Eternity",
+    "author": "William Blake",
+    "lines": ["He who binds to himself a joy", "Does the winged life destroy", "But he who kisses the joy as it flies", "Lives in eternity's sun rise"],
+    "source": "https://en.wikisource.org/wiki/Eternity_(Blake)",
+    "edition": "Eternity · Four-line text without editorial revisions",
+    "source_label": "Wikisource"
+  },
+  {
+    "id": "deer-enclosure",
+    "language": "zh",
+    "title": "鹿柴",
+    "author": "王维",
+    "lines": ["空山不见人，", "但闻人语响。", "返景入深林，", "复照青苔上。"],
+    "source": "https://zh.wikisource.org/w/index.php?title=鹿柴_(王維)&oldid=2648341",
+    "edition": "唐诗三百首 · Simplified Chinese transcription",
+    "source_label": "Wikisource"
+  }
+]

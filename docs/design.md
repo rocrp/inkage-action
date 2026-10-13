@@ -47,10 +47,10 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
    - `every`: `now - generated_at >= every - 4m` (inside window), else `fallback`. 4m = one tick minus a minute: a late Run then an on-time one still regenerates; Runs a minute apart don't both.
    - Previous Manifest of another schema `version`, a missing carried file, or a Panel whose `encoders` changed → regenerate that Frame.
    - `at`: first Run after a listed local time since last generation.
-4. Due → `fetch()` → `render()` → dither → indexed PNG + Sidecar + Preview + configured Encoders. Runtime failure → keep previous Frame, record `error` in Manifest entry.
+4. Due → `fetch()` → `render()` → dither → indexed PNG + Sidecar + Preview + configured Encoders. Runtime failure → keep previous Frame and original freshness times, record `error` and independently scheduled `retry_at`. Failed Sources wait until that exact retry time, even when another Source wakes earlier; first-run failures also receive a retry without a prior PNG. Success clears retry state.
 5. Not due → copy previous Frame + Sidecar unchanged.
 6. Write `manifest.json`, `index.html` gallery.
-7. Exit 3 if any Source failed at runtime (Site still written and deployed, then the job fails so GitHub notifies). Config errors exit 2 before any output; crashes exit 1 and deploy nothing.
+7. Exit 3 if any Source has an unresolved runtime error (Site still written and deployed, then the job fails so GitHub notifies). The Chain still runs after a successful deployment, using the earliest `retry_at` or `next_due`; cancellation/deployment failure stop it. Config errors exit 2 before any output; crashes exit 1 and deploy nothing.
 
 ## Site layout
 
@@ -65,7 +65,7 @@ Two reuse layers: **composite action** (`rocrp/inkage-action@v1`, inputs `config
 
 The Gallery is self-contained (inline style and script, no requests beyond Site-relative Previews and links); its 10 min grace is the only place the Overdue threshold is defined.
 
-Manifest entry: `source, panel, url, sha256, generated_at, next_due, error?`. Every `url` is Site-relative (devices join it with the base they fetched the Manifest from), so a mirror of the Site for networks where github.io is unreachable needs no rewriting. Devices use `If-None-Match` (Pages serves ETag) and may sleep until `next_due`.
+Manifest schema v3 entry: `source, panel, url, sha256, generated_at, next_due, encoders, error?, retry_at?`. Every `url` is Site-relative (devices join it with the base they fetched the Manifest from), so a mirror of the Site for networks where github.io is unreachable needs no rewriting. Devices use `If-None-Match` (Pages serves ETag) and may sleep until `retry_at` when present, otherwise `next_due`. A previous schema triggers full regeneration. Gallery Frame freshness uses original `next_due`; Chain heartbeat uses effective retry/due time.
 
 ## Panel
 
@@ -89,6 +89,8 @@ class Index(QuoteSource):
 ```
 
 Loading: built-in `sources/<name>/`, user `sources_dir/<name>/`. A Source may be template-only (no Python). Template context includes `panel.palette` so layouts can use red when available. Config selects Sources, picks Panels, overrides Schedule.
+
+The catalog now includes anonymous GitHub identity/2D and isometric contribution walls, public CI, public Statuspage, air-quality forecasts, hourly weather, museum art and bilingual poetry. Parameters, upstream boundaries, provenance and sample instances: [Source notes](sources.md).
 
 ## Rendering
 

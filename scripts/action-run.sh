@@ -19,8 +19,8 @@ case "$code" in
   3) failed=true ;;
   *) exit "$code" ;;
 esac
-# Earliest next_due across Frames (RFC 3339 UTC); empty when no Frame has one.
-next_due=$(jq -r '[.frames[].next_due | select(. != null)] | min // empty' "$INKAGE_OUT/manifest.json")
+# Wake for a failed Source's next attempt, without rewriting its Frame freshness.
+next_due=$(jq -r '[.frames[] | (.retry_at // .next_due) | select(. != null)] | min // empty' "$INKAGE_OUT/manifest.json")
 {
   echo "dist=$INKAGE_OUT"
   echo "failed=$failed"
