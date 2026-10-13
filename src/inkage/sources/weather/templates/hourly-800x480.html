@@ -1,16 +1,23 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html><html><head><meta charset="utf-8"><style>
-body { margin:0; width:800px; height:480px; padding:24px 36px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
-header { display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid; padding-bottom:8px; font-weight:900; }
-.place { font-size:38px; } .updated { font-size:21px; }
-.current { display:flex; gap:30px; align-items:center; height:150px; }
-.temp { font-size:112px; line-height:1; font-weight:900; color:{{ accent }}; } .temp small { font-size:40px; }
-.condition { font-size:34px; font-weight:900; } .meta { font-size:21px; font-weight:700; }
-.title { font-size:20px; font-weight:900; border-bottom:2px solid; padding-bottom:8px; }
-.hours { display:flex; margin-top:8px; } .hour { flex:1; text-align:center; border-left:2px solid; } .hour:first-child { border:0; }
-.time { font-size:22px; font-weight:900; } .degree { font-size:37px; font-weight:900; margin:5px 0; }
-.rain { font-size:22px; font-weight:700; line-height:1.4; }
-footer { font-size:16px; font-weight:700; margin-top:15px; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {margin:0; width:800px; height:480px; padding:24px 36px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; font-size:12px; line-height:1.2;}
+header {display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid; padding-bottom:8px; font-weight:400;}
+.place {font:32px/40px "Unifont";}
+.updated {font:20px/28px "Fusion Pixel 10";}
+.current {display:flex; gap:30px; align-items:center; height:150px;}
+.temp {color:{{ accent }}; font:110px/1 "Departure Mono";}
+.temp small {font:36px/44px "Fusion Pixel 12";}
+.condition {font:32px/40px "Unifont";}
+.meta {font:20px/28px "Fusion Pixel 10";}
+.title {border-bottom:2px solid; padding-bottom:8px; font:20px/28px "Fusion Pixel 10";}
+.hours {display:flex; margin-top:8px;}
+.hour {flex:1; text-align:center; border-left:2px solid;}
+.hour:first-child {border:0;}
+.time {font:22px/28px "Departure Mono";}
+.degree {margin:5px 0; font:33px/40px "Departure Mono";}
+.rain {font:20px/28px "Fusion Pixel 10";}
+footer {margin-top:15px; font:20px/28px "Fusion Pixel 10";}
 </style></head><body>
 <header><span class="place">{{ data.label }}</span><span class="updated">{{ data.updated }}</span></header>
 <div class="current"><div class="temp">{{ data.temp }}<small>{{ data.temp_unit }}</small></div><div><div class="condition">{{ data.condition }}</div><div class="meta">Humidity {{ data.humidity }} · Wind {{ data.wind }}</div></div></div>

@@ -1,7 +1,76 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html><html><head><meta charset="utf-8"><style>
-body{width:800px;height:480px;box-sizing:border-box;padding:24px 32px;margin:0;background:{{ink.white}};color:{{ink.black}};font-family:"Noto Sans CJK SC","PingFang SC",sans-serif;display:flex;flex-direction:column}
-.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kicker{font-size:16px;letter-spacing:2px;font-weight:700}h1{font-size:34px;margin:4px 0 12px;line-height:1.2}.list{border-top:3px solid {{ink.black}}}.run{padding:9px 0;border-bottom:1px solid {{ink.black}};display:grid;grid-template-columns:minmax(0,1fr) 188px;gap:14px;align-items:center}.name{font-size:21px;font-weight:900}.meta{font-size:14px;margin-top:2px}.state{font-size:17px;font-weight:900;border:2px solid {{ink.black}};text-align:center;padding:6px 3px}.failed{color:{{accent}};border-color:{{accent}}}.empty{font-size:30px;margin:auto}.foot{font-size:14px;display:flex;justify-content:space-between;margin-top:auto;padding-top:10px}
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    width: 800px;
+    height: 480px;
+    box-sizing: border-box;
+    padding: 24px 32px;
+    margin: 0;
+    background: {{ink.white}};
+    color: {{ink.black}};
+    font-family: "Fusion Pixel 12";
+    display: flex;
+    flex-direction: column;
+  }
+  .one {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kicker {
+    font: 20px/28px "Fusion Pixel 10";
+  }
+  h1 {
+    font: 36px/44px "Fusion Pixel 12";
+    margin: 4px 0 12px;
+  }
+  .list {
+    border-top: 3px solid {{ink.black}};
+  }
+  .run {
+    padding: 9px 0;
+    border-bottom: 1px solid {{ink.black}};
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 188px;
+    gap: 14px;
+    align-items: center;
+  }
+  .name {
+    font: 24px/30px "Fusion Pixel 12";
+  }
+  .meta {
+    font: 10px/14px "Fusion Pixel 10";
+    margin-top: 2px;
+  }
+  .state {
+    font: 12px/16px "Fusion Pixel 12";
+    border: 2px solid {{ink.black}};
+    text-align: center;
+    padding: 6px 3px;
+  }
+  .failed {
+    color: {{accent}};
+    border-color: {{accent}};
+  }
+  .empty {
+    font: 24px/30px "Fusion Pixel 12";
+    margin: auto;
+  }
+  .foot {
+    font: 10px/14px "Fusion Pixel 10";
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 10px;
+  }
 </style></head><body><div class="kicker">GITHUB ACTIONS</div><h1 class="one">{{data.repo}}</h1>
 {% if data.runs %}<div class="list">{% for run in data.runs %}<div class="run"><div><div class="name one">{{run.name}}</div><div class="meta one">{{run.branch}} · {{run.sha}} · {{run.updated}}</div></div><div class="state {% if run.failed %}failed{% endif %}">{{run.state}}</div></div>{% endfor %}</div>{% else %}<div class="empty">No workflow runs{% if data.branch %} on {{data.branch}}{% endif %}</div>{% endif %}
 <div class="foot"><span>Latest {{data.runs|length}} run{% if data.runs|length != 1 %}s{% endif %}{% if data.branch %} · {{data.branch}}{% endif %}</span><span>Checked {{data.checked}}</span></div></body></html>

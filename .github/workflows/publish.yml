@@ -56,7 +56,9 @@ jobs:
           config: ${{ inputs.config }}
           sources_dir: ${{ inputs.sources_dir }}
           fonts_dir: ${{ inputs.fonts_dir }}
+          # A code/template push must regenerate even daily Frames immediately.
           site_url: ${{ steps.pages.outputs.base_url }}
+          force: ${{ github.event_name == 'push' }}
 
       - uses: actions/upload-pages-artifact@v4
         with:

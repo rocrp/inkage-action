@@ -49,7 +49,7 @@ That first run starts the **chain**: after deploying, a second job waits until t
 
 A complete example lives in [`examples/consumer/`](examples/consumer/).
 
-**Only the action** (publish somewhere else, e.g. release assets): `uses: rocrp/inkage-action@v1` with inputs `config`, `sources_dir`, `fonts_dir`, `site_url` (live Site holding the previous Manifest; empty = regenerate all), `out`. Outputs: `dist` (Site directory), `failed` (`'true'` if a Source failed at runtime) and `next_due` (earliest next due time, for your own chain step).
+**Only the action** (publish somewhere else, e.g. release assets): `uses: rocrp/inkage-action@v1` with inputs `config`, `sources_dir`, `fonts_dir`, `site_url` (live Site holding the previous Manifest; empty = regenerate all), `out`, `force` (regenerate all while retaining previous Frames on failure). Outputs: `dist` (Site directory), `failed` (`'true'` if a Source failed at runtime) and `next_due` (earliest next due time, for your own chain step).
 
 ### Custom Sources
 
@@ -78,7 +78,7 @@ Put each Source in `sources/<name>/` and pass `sources_dir: sources`. Names must
 
 Template context: `data` (from `fetch`), `now` (local datetime), `params`, `panel` (`id`, `width`, `height`, `palette`, `inks`) and `ink` (CSS hex per available ink, e.g. `{{ ink.red }}`). Use `{% if 'red' in panel.inks %}` to adapt to the palette. Pages render in headless Chromium at the Panel's exact size; text is drawn without antialiasing.
 
-**Fonts**: files in `fonts/` (`.ttf .otf .woff .woff2`) become `@font-face` families named after the file stem: `fonts/Pixel.ttf` → `font-family: "Pixel"`. Noto Sans CJK SC is installed on the runner.
+**Fonts**: built-in templates bundle Fusion Pixel 12 (body), Fusion Pixel 10 (metadata), Unifont 16 (larger Chinese), and Departure Mono 11 (Latin/numerals). Sizes use integer multiples of each font's base size, without synthetic bold. [Font versions and licenses](src/inkage/fonts/README.md). Consumer files in `fonts/` (`.ttf .otf .woff .woff2`) remain available as families named after the file stem: `fonts/Pixel.ttf` → `font-family: "Pixel"`. Noto Sans CJK SC remains installed for custom templates. A code push regenerates all Frames so daily layouts receive font/template changes immediately, retaining the previous Frame if its Source fails. For a manual CLI refresh, use `inkage run --site-url <live-site> --force`.
 
 **Secrets**: map repository secrets to environment variables in your own workflow when you need them; a Source's `requires_secrets` must all be set or validation fails. With the reusable workflow, call the action directly in your own job (steps: checkout, `actions/configure-pages`, `rocrp/inkage-action@v1` with `env:` secrets, `upload-pages-artifact`, `deploy-pages`) since reusable workflows do not forward arbitrary env.
 

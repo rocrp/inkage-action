@@ -3,26 +3,96 @@
 {%- set rest = data.events[1:5] -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; display: flex; }
-  .hero { width: {{ 420 if rest else 800 }}px; box-sizing: border-box; padding: 30px 32px; display: flex;
-          flex-direction: column; align-items: center; justify-content: center; text-align: center;
-          {% if rest %}border-right: 3px solid {{ ink.black }};{% endif %} }
-  .title { font-size: 46px; font-weight: 900; max-width: 100%; white-space: nowrap; overflow: hidden;
-           text-overflow: ellipsis; }
-  .num { font-size: {{ 96 if top.days == 0 else (190 if top.days | abs < 1000 else 150) }}px; font-weight: 900;
-         line-height: 1.05; color: {{ accent }}; letter-spacing: -4px; }
-  .unit { font-size: 40px; font-weight: 900; }
-  .date { font-size: 28px; font-weight: 700; margin-top: 16px; border-top: 3px solid {{ ink.black }}; padding-top: 10px; }
-  .list { flex: 1; padding: 28px 24px; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; }
-  .head { font-size: 26px; font-weight: 900; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
-  .row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-         border-bottom: 2px solid {{ ink.black }}; padding: 8px 0; }
-  .row .t { font-size: 26px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  .row .t small { display: block; font-size: 18px; }
-  .row .d { font-size: 28px; font-weight: 900; white-space: nowrap; }
-  .row .d.past { color: {{ ink.black }}; }
-  .row .d.soon { color: {{ accent }}; }
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    width: 800px;
+    height: 480px;
+    background: {{ ink.white }};
+    color: {{ ink.black }};
+    font-family: "Fusion Pixel 12";
+    display: flex;
+  }
+  .hero {
+    width: {{ 420 if rest else 800 }}px;
+    box-sizing: border-box;
+    padding: 30px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    {% if rest %}border-right: 3px solid {{ ink.black }};
+    {% endif %};
+  }
+  .title {
+    font: 32px/38px "Unifont";
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .num {
+    font: {{ 88 if top.days == 0 else (165 if top.days | abs < 1000 else 132) }}px/1.2 "Departure Mono";
+    color: {{ accent }};
+  }
+  .unit {
+    font: 24px/30px "Fusion Pixel 12";
+  }
+  .date {
+    font: 20px/28px "Fusion Pixel 10";
+    margin-top: 16px;
+    border-top: 3px solid {{ ink.black }};
+    padding-top: 10px;
+  }
+  .list {
+    flex: 1;
+    padding: 28px 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .head {
+    font: 24px/30px "Fusion Pixel 12";
+    border-bottom: 3px solid {{ ink.black }};
+    padding-bottom: 8px;
+  }
+  .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid {{ ink.black }};
+    padding: 8px 0;
+  }
+  .row .t {
+    font: 24px/30px "Fusion Pixel 12";
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .row .t small {
+    font: 20px/28px "Fusion Pixel 10";
+    display: block;
+  }
+  .row .d {
+    font: 22px/30px "Departure Mono";
+    white-space: nowrap;
+  }
+  .row .d.past {
+    color: {{ ink.black }};
+  }
+  .row .d.soon {
+    color: {{ accent }};
+  }
 </style></head><body>
   <div class="hero">
     <div class="title">{{ top.title }}</div>

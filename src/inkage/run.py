@@ -104,11 +104,17 @@ def context_for(sc: SourceConfig, now: datetime) -> Context:
     )
 
 
-async def run(config: Config, get: Getter, out: Path, now: datetime, fonts_dir: Path | None = None) -> RunResult:
+async def run(
+    config: Config, get: Getter, out: Path, now: datetime, fonts_dir: Path | None = None, *, force: bool = False
+) -> RunResult:
     previous = Manifest.from_bytes(raw) if (raw := get(MANIFEST)) is not None else None
     if previous is None:
         logger.warning("no previous Manifest reachable; regenerating every Frame")
     decisions = plan(config, previous, now)
+    if force:
+        for d in decisions:
+            d.due, d.reason = True, "forced refresh"
+            d.next_due = d.source.schedule.next_due(now, d.source.tz)
     files: dict[str, bytes] = {}
     entries: dict[tuple[str, str], Entry] = {}
 

@@ -4,26 +4,26 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { margin: 0; width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 26px 40px; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
-  .label { font-size: 40px; font-weight: 900; }
-  .upd { font-size: 22px; font-weight: 700; }
-  .now { display: flex; align-items: center; height: 190px; }
-  .temp { font-size: 150px; font-weight: 900; line-height: 1; letter-spacing: -4px; color: {{ accent }}; white-space: nowrap; }
-  .temp small { font-size: 56px; letter-spacing: 0; vertical-align: top; }
-  .side { margin-left: 36px; }
-  .cond { font-size: 46px; font-weight: 900; line-height: 1.1; }
-  .meta { font-size: 28px; font-weight: 700; margin-top: 10px; }
-  .days { display: flex; border-top: 3px solid {{ ink.black }}; }
-  .d { flex: 1; text-align: center; padding-top: 10px; border-left: 2px solid {{ ink.black }}; }
-  .d:first-child { border-left: none; }
-  .wd { font-size: 26px; font-weight: 900; }
-  .wd span { font-size: 20px; font-weight: 700; }
-  .dc { font-size: 20px; font-weight: 700; height: 52px; line-height: 26px; margin: 4px 6px 0; overflow: hidden; }
-  .hl { font-size: 32px; font-weight: 900; }
-  .hl b { color: {{ accent }}; }
-  .pp { font-size: 22px; font-weight: 700; margin-top: 2px; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {margin:0; width:800px; height:480px; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; box-sizing:border-box; padding:26px 40px; font-size:12px; line-height:1.2;}
+.head {display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid {{ ink.black }}; padding-bottom:8px;}
+.label {font:32px/40px "Unifont";}
+.upd {font:20px/28px "Fusion Pixel 10";}
+.now {display:flex; align-items:center; height:190px;}
+.temp {letter-spacing:0; color:{{ accent }}; white-space:nowrap; font:132px/1 "Departure Mono";}
+.temp small {letter-spacing:0; vertical-align:top; font:48px/56px "Fusion Pixel 12";}
+.side {margin-left:36px;}
+.cond {font:32px/40px "Unifont";}
+.meta {margin-top:10px; font:24px/30px "Fusion Pixel 12";}
+.days {display:flex; border-top:3px solid {{ ink.black }};}
+.d {flex:1; text-align:center; padding-top:10px; border-left:2px solid {{ ink.black }};}
+.d:first-child {border-left:none;}
+.wd {font:24px/30px "Fusion Pixel 12";}
+.wd span {font:20px/28px "Fusion Pixel 10";}
+.dc {height:56px; margin:4px 6px 0; overflow:hidden; font:20px/28px "Fusion Pixel 10";}
+.hl {font:22px/28px "Departure Mono";}
+.hl b {color:{{ accent }};}
+.pp {margin-top:2px; font:20px/28px "Fusion Pixel 10";}
 </style></head><body>
   <div class="head"><span class="label">{{ data.label }}</span><span class="upd">{{ data.updated }}</span></div>
   <div class="now">

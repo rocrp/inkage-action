@@ -2,8 +2,9 @@
 
 Text should be hard-edged before dithering: on Linux the action disables
 fontconfig antialiasing; on macOS ``-webkit-font-smoothing: none`` does it.
-Fonts from a consumer ``fonts/`` dir are injected as ``@font-face`` rules whose
-family is the file stem.
+Bundled pixel fonts are registered without changing template typography.
+Fonts from a consumer ``fonts/`` dir are also injected as ``@font-face`` rules
+whose family is the file stem.
 """
 
 from __future__ import annotations
@@ -16,6 +17,8 @@ from types import TracebackType
 
 from PIL import Image
 from playwright.async_api import Browser, Playwright, async_playwright
+
+from inkage.fonts import bundled_font_css
 
 FONT_SUFFIXES = (".ttf", ".otf", ".woff", ".woff2")
 _HEAD = re.compile(r"<head(\s[^>]*)?>", re.IGNORECASE)
@@ -43,7 +46,7 @@ def _inject_head(html: str, head: str) -> str:
 
 class Renderer:
     def __init__(self, fonts_dir: Path | None = None) -> None:
-        self._css = _BASE_CSS + font_face_css(fonts_dir)
+        self._css = _BASE_CSS + bundled_font_css() + font_face_css(fonts_dir)
         self._pw: Playwright | None = None
         self._browser: Browser | None = None
         self._tmp = tempfile.TemporaryDirectory(prefix="inkage-")

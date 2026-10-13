@@ -1,24 +1,86 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 36px 48px; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 12px; }
-  .name { font-size: 48px; font-weight: 900; }
-  .code { font-size: 28px; font-weight: 700; }
-  .price { font-size: 150px; font-weight: 900; line-height: 1.1; margin-top: 28px; letter-spacing: -2px; }
-  .chg { font-size: 56px; font-weight: 900; color: {{ data.color }}; }
-  .foot { position: absolute; left: 48px; right: 48px; bottom: 30px; display: flex; justify-content: space-between;
-          font-size: 22px; font-weight: 700; white-space: nowrap; border-top: 2px solid {{ ink.black }}; padding-top: 10px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 30px; font-weight: 900; white-space: nowrap; }
-  td { padding: 3px 0; line-height: 1.2; border-bottom: 1px solid {{ ink.black }}; }
-  td.num { text-align: right; padding-left: 16px; }
-  td.n { overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    width: 800px;
+    height: 480px;
+    background: {{ ink.white }};
+    color: {{ ink.black }};
+    font-family: "Fusion Pixel 12";
+    box-sizing: border-box;
+    padding: 36px 48px;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 3px solid {{ ink.black }};
+    padding-bottom: 12px;
+  }
+  .name {
+    font: 48px/56px "Unifont";
+  }
+  .code {
+    font: 22px/28px "Departure Mono";
+  }
+  .price {
+    font: 110px/132px "Departure Mono";
+    margin-top: 28px;
+  }
+  .chg {
+    font: 36px/44px "Fusion Pixel 12";
+    color: {{ data.color }};
+  }
+  .foot {
+    font: 20px/28px "Fusion Pixel 10";
+    position: absolute;
+    left: 48px;
+    right: 48px;
+    bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
+    border-top: 2px solid {{ ink.black }};
+    padding-top: 10px;
+  }
+  table {
+    font: 24px/36px "Fusion Pixel 12";
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  td {
+    padding: 3px 0;
+    line-height: 1.2;
+    border-bottom: 1px solid {{ ink.black }};
+  }
+  td.num {
+    font: 22px/36px "Departure Mono";
+    text-align: right;
+    padding-left: 16px;
+  }
+  .direction {
+    font: 24px/36px "Fusion Pixel 12";
+  }
+  td.n {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+  }
 </style></head><body>
 {% if data.quotes | length > 1 %}
   <table>
   {% for q in data.quotes[:8] %}
     <tr><td class="n">{{ q.name }}</td><td class="num">{{ q.price }}</td>
-      <td class="num" style="color: {{ q.color }}">{{ "▲" if q.direction == "up" else ("▼" if q.direction == "down" else "■") }} {{ q.change }}</td>
+      <td class="num" style="color: {{ q.color }}"><span class="direction">{{ "▲" if q.direction == "up" else ("▼" if q.direction == "down" else "■") }}</span> {{ q.change }}</td>
       <td class="num" style="color: {{ q.color }}">{{ q.change_pct }}</td></tr>
   {% endfor %}
   </table>

@@ -2,15 +2,14 @@
 {%- macro arrow(d) %}{{ "▲" if d == "up" else ("▼" if d == "down" else "■") }}{% endmacro -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { width: 250px; height: 122px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 4px 8px; overflow: hidden; }
-  .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 16px; font-weight: 900; }
-  .time { font-size: 12px; font-weight: 700; }
-  .price { font-size: 34px; font-weight: 900; line-height: 1.1; white-space: nowrap; }
-  .chg { font-size: 15px; font-weight: 900; white-space: nowrap; }
-  .others { display: grid; grid-template-columns: {{ ["1fr", "1fr 1fr", "1fr 1fr 1fr"][(data.coins | length - 2) // 2] }}; column-gap: 6px; margin-top: 3px; padding-top: 2px;
-            border-top: 2px solid {{ ink.black }}; font-size: {{ 11 if data.coins | length > 5 else 12 }}px; font-weight: 700; line-height: 1.25; }
-  .others div { display: flex; justify-content: space-between; white-space: nowrap; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {width:250px; height:122px; margin:0; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; box-sizing:border-box; padding:4px 8px; overflow:hidden; font-size:12px; line-height:1.2;}
+.top {display:flex; justify-content:space-between; align-items:baseline; font:11px/15px "Departure Mono";}
+.time {font:10px/12px "Fusion Pixel 10";}
+.price {white-space:nowrap; font:33px/38px "Departure Mono"; margin-top:2px;}
+.chg {white-space:nowrap; font:12px/16px "Fusion Pixel 12";}
+.others {display:grid; grid-template-columns:{{ ["1fr", "1fr 1fr", "1fr 1fr 1fr"][(data.coins | length - 2) // 2] }}; column-gap:6px; margin-top:5px; padding-top:3px; border-top:2px solid {{ ink.black }}; font:11px/16px "Departure Mono";}
+.others div {display:flex; justify-content:space-between; white-space:nowrap;}
 </style></head><body>
   <div class="top"><span>{{ first.symbol }}/{{ data.quote }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
   <div class="price">{{ first.price }}</div>

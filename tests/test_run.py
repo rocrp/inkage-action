@@ -85,6 +85,25 @@ def test_only_due_frame_changes(tmp_path):
         assert after[k] == before[k]
 
 
+def test_forced_release_refresh_preserves_last_good_frame_on_upstream_failure(tmp_path):
+    # A release arrives one minute after a successful run, before any Source is due.
+    cfg = config()
+    before, release, waiting = (tmp_path / name for name in ("before", "release", "waiting"))
+    do_run(cfg, lambda _p: None, before, T0)
+    cfg.sources[-1].params["fail"] = True
+    at = T0 + timedelta(minutes=1)
+    result = asyncio.run(run(cfg, site_getter(before), release, at, force=True))
+    frames = result.manifest.by_key()
+    assert frames[("daily", "250x122-bw")].generated_at == "2026-10-12T00:01:00Z"
+    failed = frames[("flaky", "250x122-bwr")]
+    assert (failed.generated_at, failed.retry_at) == ("2026-10-12T00:00:00Z", "2026-10-12T00:06:00Z")
+    assert (release / "flaky/250x122-bwr.png").read_bytes() == (before / "flaky/250x122-bwr.png").read_bytes()
+    # The next ordinary chain run must honor the retry time, even if upstream recovers.
+    cfg.sources[-1].params["fail"] = False
+    followup = do_run(cfg, site_getter(release), waiting, T0 + timedelta(minutes=2))
+    assert followup.manifest.by_key()[("flaky", "250x122-bwr")] == failed
+
+
 def test_manifest_entry_fields_and_next_due(tmp_path):
     do_run(config(), lambda _p: None, tmp_path, T0)
     frames = {(e["source"], e["panel"]): e for e in json.loads((tmp_path / "manifest.json").read_bytes())["frames"]}

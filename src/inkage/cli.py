@@ -146,11 +146,12 @@ def run_cmd(
     sources_dir: SourcesOpt = None,
     fonts_dir: FontsOpt = None,
     now: NowOpt = None,
+    force: Annotated[bool, typer.Option(help="Regenerate all Frames, retaining previous Frames on failure")] = False,
 ) -> None:
     """Regenerate due Frames, carry the rest over, write the full Site."""
     cfg = _load(config, sources_dir)
     get = http_getter(site_url) if site_url else (lambda _path: None)
-    result = asyncio.run(run(cfg, get, out, _now(now), fonts_dir=fonts_dir))
+    result = asyncio.run(run(cfg, get, out, _now(now), fonts_dir=fonts_dir, force=force))
     _summary(result)
     if not result.ok:
         typer.echo(f"{len(result.errors)} Frame(s) failed; Site written with previous Frames kept", err=True)

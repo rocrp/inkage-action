@@ -3,23 +3,21 @@
 {%- macro arrow(d) %}{{ "▲" if d == "up" else ("▼" if d == "down" else "■") }}{% endmacro -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { width: 800px; height: 480px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 24px 40px 20px;
-         display: flex; flex-direction: column; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }};
-          padding-bottom: 8px; font-weight: 900; }
-  .title { font-size: 36px; }
-  .time { font-size: 22px; font-weight: 700; }
-  .rows { flex: 1; display: flex; flex-direction: column; }
-  .row { flex: 1; min-height: 0; display: flex; align-items: center; border-bottom: 2px solid {{ ink.black }}; white-space: nowrap; }
-  .row:last-child { border-bottom: none; }
-  .sym { width: {{ 170 if big else 230 }}px; }
-  .sym b { display: block; font-size: {{ 52 if big else 34 }}px; font-weight: 900; line-height: 1; }
-  .sym span { font-size: {{ 18 if big else 14 }}px; font-weight: 700; display: block; }
-  .price { flex: 1; text-align: right; font-size: {{ 64 if big else 40 }}px; font-weight: 900; letter-spacing: -1px; }
-  .chg { width: {{ 230 if big else 210 }}px; text-align: right; font-weight: 900; line-height: 1.1; }
-  .chg .pct { font-size: {{ 40 if big else 28 }}px; }
-  .chg .abs { font-size: {{ 22 if big else 16 }}px; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {width:800px; height:480px; margin:0; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; box-sizing:border-box; padding:24px 40px 20px; display:flex; flex-direction:column; font-size:12px; line-height:1.2;}
+.head {display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid {{ ink.black }}; padding-bottom:8px; font-weight:400;}
+.title {font:33px/40px "Departure Mono";}
+.time {font:20px/28px "Fusion Pixel 10";}
+.rows {flex:1; display:flex; flex-direction:column;}
+.row {flex:1; min-height:0; display:flex; align-items:center; border-bottom:2px solid {{ ink.black }}; white-space:nowrap;}
+.row:last-child {border-bottom:none;}
+.sym {width:{{ 170 if big else 230 }}px;}
+.sym b {display:block; font:33px/40px "Departure Mono";}
+.sym span {display:block; font:10px/14px "Fusion Pixel 10";}
+.price {flex:1; text-align:right; letter-spacing:0; font:33px/40px "Departure Mono";}
+.chg {width:{{ 230 if big else 210 }}px; text-align:right; font-weight:400; line-height:1.1;}
+.chg .pct {font:24px/30px "Fusion Pixel 12";}
+.chg .abs {font:22px/28px "Departure Mono";}
 </style></head><body>
   <div class="head"><span class="title">CRYPTO · {{ data.quote }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
   <div class="rows">

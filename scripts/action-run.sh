@@ -5,6 +5,7 @@ set -euo pipefail
 : "${GITHUB_ACTION_PATH:?}" "${GITHUB_OUTPUT:?}"
 
 args=(run --config "$INKAGE_CONFIG" --site-url "$INKAGE_SITE_URL" --out "$INKAGE_OUT")
+[[ "${INKAGE_FORCE:-false}" == true ]] && args+=(--force)
 [[ -n "$INKAGE_SOURCES_DIR" ]] && args+=(--sources-dir "$INKAGE_SOURCES_DIR")
 fonts_dir="$INKAGE_FONTS_DIR"
 [[ -z "$fonts_dir" && -d fonts ]] && fonts_dir=fonts

@@ -2,17 +2,62 @@
 {%- set row_h = (360 // data.rates | length) if data.rates | length > 3 else 120 -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { margin: 0; width: 800px; height: 480px; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 26px 40px; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid {{ ink.black }}; padding-bottom: 8px; }
-  .title { font-size: 40px; font-weight: 900; }
-  .date { font-size: 22px; font-weight: 700; }
-  .row { display: flex; align-items: center; height: {{ row_h }}px; border-bottom: 2px solid {{ ink.black }}; }
-  .row:last-child { border-bottom: none; }
-  .sym { width: 150px; font-size: {{ [row_h * 0.45, 52] | min | int }}px; font-weight: 900; }
-  .rate { flex: 1; font-size: {{ [row_h * 0.62, 72] | min | int }}px; font-weight: 900; letter-spacing: -1px; }
-  .chg { width: 250px; text-align: right; font-size: {{ [row_h * 0.27, 30] | min | int }}px; font-weight: 900; line-height: 1.2; }
-  .chg.down { color: {{ accent }}; }
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
+    width: 800px;
+    height: 480px;
+    background: {{ ink.white }};
+    color: {{ ink.black }};
+    font-family: "Fusion Pixel 12";
+    box-sizing: border-box;
+    padding: 26px 40px;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 3px solid {{ ink.black }};
+    padding-bottom: 8px;
+  }
+  .title {
+    font: 36px/44px "Fusion Pixel 12";
+  }
+  .date {
+    font: 20px/28px "Fusion Pixel 10";
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    height: {{ row_h }}px;
+    border-bottom: 2px solid {{ ink.black }};
+  }
+  .row:last-child {
+    border-bottom: none;
+  }
+  .sym {
+    font: {{ [((row_h * 0.45) // 12) * 12, 48] | min | int }}px/1.2 "Fusion Pixel 12";
+    width: 150px;
+  }
+  .rate {
+    font: {{ [((row_h * 0.62) // 11) * 11, 66] | min | int }}px/1.2 "Departure Mono";
+    flex: 1;
+  }
+  .chg {
+    font: {{ [((row_h * 0.27) // 12) * 12, 24] | min | int }}px/1.2 "Fusion Pixel 12";
+    width: 250px;
+    text-align: right;
+  }
+  .chg.down {
+    color: {{ accent }};
+  }
 </style></head><body>
   <div class="head"><span class="title">1 {{ data.base }} =</span><span class="date">ECB {{ data.date }} vs {{ data.prev_date }}</span></div>
   {%- for r in data.rates %}

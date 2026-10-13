@@ -34,7 +34,7 @@ section{margin-bottom:24px} h2{font-size:16px;margin:0 0 4px}
 .fresh,.retry{margin:0 0 8px;color:var(--muted)} .overdue{color:var(--err);font-weight:600}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
 figure{margin:0;padding:12px;background:var(--card);border-radius:8px}
-img{max-width:100%;image-rendering:pixelated;border:1px solid var(--muted)}
+img{max-width:100%;border:1px solid var(--muted)}
 figcaption{margin-top:8px;color:var(--muted);word-break:break-all} figcaption a:first-child{color:var(--fg)}
 .error{color:var(--err);margin:0 0 8px} .missing{padding:32px;text-align:center;border:1px dashed var(--muted)}
 </style>"""

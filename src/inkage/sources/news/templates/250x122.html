@@ -1,16 +1,14 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html>
 <html><head><meta charset="utf-8"><style>
-  body { width: 250px; height: 122px; margin: 0; background: {{ ink.white }}; color: {{ ink.black }};
-         font-family: "Noto Sans CJK SC", "PingFang SC", sans-serif; box-sizing: border-box; padding: 3px 6px; overflow: hidden; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 900;
-          border-bottom: 2px solid {{ ink.black }}; white-space: nowrap; }
-  .head span:first-child { overflow: hidden; text-overflow: ellipsis; }
-  .time { font-size: 11px; font-weight: 700; margin-left: 6px; }
-  .item { display: flex; gap: 4px; margin-top: 3px; }
-  .num { font-size: 12px; font-weight: 900; color: {{ accent }}; width: 9px; }
-  .title { flex: 1; min-width: 0; font-size: 12px; font-weight: 700; line-height: 1.2; overflow: hidden;
-           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {width:250px; height:122px; margin:0; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; box-sizing:border-box; padding:3px 6px; overflow:hidden; font-size:12px; line-height:1.2;}
+.head {display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid {{ ink.black }}; white-space:nowrap; font:16px/20px "Unifont";}
+.head span:first-child {overflow:hidden; text-overflow:ellipsis;}
+.time {margin-left:6px; font:10px/12px "Fusion Pixel 10";}
+.item {display:flex; gap:4px; margin-top:2px;}
+.num {color:{{ accent }}; width:12px; font:12px/14px "Fusion Pixel 12"; flex-shrink:0;}
+.title {flex:1; min-width:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; font:12px/14px "Fusion Pixel 12";}
 </style></head><body>
   <div class="head"><span>{{ data.label }}</span><span class="time">{{ now.strftime("%H:%M") }}</span></div>
   {%- for it in data["items"][:3] %}

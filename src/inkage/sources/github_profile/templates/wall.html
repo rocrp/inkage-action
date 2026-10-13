@@ -10,11 +10,11 @@
   {% for cell in data.wall.cells %}<g><title>{{ cell.date }}: {{ cell.count }} contributions</title>
   {% for side in cell.sides %}<polygon points="{{ side }}" fill="white" stroke="black" stroke-width="0.75"/>{% endfor %}
   <polygon points="{{ cell.top }}" fill="url(#level{{ cell.level }})" stroke="black" stroke-width="0.75"/></g>{% endfor %}
-  <text x="12" y="201" font-size="15" font-weight="700">{{ data.start }} → {{ data.end }} · weeks left to right; Sun → Sat diagonally</text>
+  <text x="12" y="201" font-family="'Fusion Pixel 10'" font-size="10" font-weight="400">{{ data.start }} → {{ data.end }} · weeks left to right; Sun → Sat diagonally</text>
 {% else %}
   {% if not data.wall.compact %}
-  {% for month in data.wall.months %}<text x="{{ month.x }}" y="17" font-size="15" font-weight="700">{{ month.label }}</text>{% endfor %}
-  {% for label, y in [('Mon', 65), ('Wed', 113), ('Fri', 161)] %}<text x="0" y="{{ y }}" font-size="12" font-weight="700">{{ label }}</text>{% endfor %}
+  {% for month in data.wall.months %}<text x="{{ month.x }}" y="17" font-family="'Fusion Pixel 10'" font-size="10" font-weight="400">{{ month.label }}</text>{% endfor %}
+  {% for label, y in [('Mon', 65), ('Wed', 113), ('Fri', 161)] %}<text x="0" y="{{ y }}" font-family="'Fusion Pixel 12'" font-size="12" font-weight="400">{{ label }}</text>{% endfor %}
   {% endif %}
   {% for cell in data.wall.cells %}<rect x="{{ cell.x }}" y="{{ cell.y }}" width="{{ 6 if data.wall.compact else 10 }}" height="{{ 6 if data.wall.compact else 20 }}" fill="url(#level{{ cell.level }})" stroke="black" stroke-width="{{ 0.5 if data.wall.compact else 0.7 }}"><title>{{ cell.date }}: {{ cell.count }} contributions</title></rect>{% endfor %}
 {% endif %}

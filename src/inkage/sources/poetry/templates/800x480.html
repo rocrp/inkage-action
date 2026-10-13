@@ -1,18 +1,16 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html>
 <html lang="{{ data.language }}"><head><meta charset="utf-8"><style>
-body { width:800px; height:480px; box-sizing:border-box; padding:28px 42px;
-  color:{{ ink.black }}; background:{{ ink.white }}; display:flex; flex-direction:column;
-  font-family:Georgia,"Noto Serif CJK SC","Songti SC",serif; }
-header { display:flex; justify-content:space-between; border-bottom:2px solid {{ ink.black }};
-  padding-bottom:10px; font:13px/1.1 Arial,sans-serif; letter-spacing:2px; }
-main { flex:1; display:flex; flex-direction:column; justify-content:center; }
-h1 { margin:0 0 18px; font-size:28px; color:{{ accent }}; }
-.line { font-size:{{ 36 if data.language == 'zh' else 28 }}px; line-height:1.65;
-  white-space:nowrap; }
-footer { border-top:1px solid {{ ink.black }}; padding-top:10px; display:flex;
-  justify-content:space-between; align-items:baseline; }
-.author { font-size:20px; }.source { font:12px Arial,sans-serif; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {width:800px; height:480px; box-sizing:border-box; padding:28px 42px; color:{{ ink.black }}; background:{{ ink.white }}; display:flex; flex-direction:column; font-family:"Fusion Pixel 12"; font-size:12px; line-height:1.2;}
+header {display:flex; justify-content:space-between; border-bottom:2px solid {{ ink.black }}; padding-bottom:10px; letter-spacing:0; font:20px/24px "Fusion Pixel 10";}
+main {flex:1; display:flex; flex-direction:column; justify-content:center;}
+h1 {margin:0 0 18px; color:{{ accent }}; font:32px/36px "Unifont";}
+.line {white-space:normal; font:32px/48px "Unifont";}
+footer {border-top:1px solid {{ ink.black }}; padding-top:10px; display:flex; justify-content:space-between; align-items:baseline;}
+.author {font:20px/28px "Fusion Pixel 10";}
+.source {font:20px/28px "Fusion Pixel 10";}
+html[lang="en"] .line {font:22px/36px "Departure Mono";}
 </style></head><body>
 <header><span>DAILY POETRY</span><span>{{ now.strftime('%d %b %Y') }}</span></header>
 <main><h1>{{ data.title }}</h1>{% for line in data.lines %}<div class="line">{{ line }}</div>{% endfor %}</main>

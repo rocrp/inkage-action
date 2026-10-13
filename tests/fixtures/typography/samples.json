@@ -1,0 +1,390 @@
+[
+  {
+    "id": "calendar",
+    "source": "calendar",
+    "title": "日历 · 2026-10-13",
+    "params": {},
+    "data": {
+      "date": "2026-10-13",
+      "year": 2026,
+      "month": 10,
+      "day": 13,
+      "weekday": 1,
+      "weekday_zh": "二",
+      "weekday_en": "Tuesday",
+      "month_en": "October",
+      "lunar_month": "九月",
+      "lunar_day": "初四",
+      "year_ganzhi": "丙午",
+      "zodiac": "马",
+      "solar_term": "",
+      "next_term": "霜降",
+      "next_term_days": 10,
+      "festivals": [],
+      "grid": [
+        [
+          {"day": 28, "in_month": false, "today": false, "weekend": false},
+          {"day": 29, "in_month": false, "today": false, "weekend": false},
+          {"day": 30, "in_month": false, "today": false, "weekend": false},
+          {"day": 1, "in_month": true, "today": false, "weekend": false},
+          {"day": 2, "in_month": true, "today": false, "weekend": false},
+          {"day": 3, "in_month": true, "today": false, "weekend": true},
+          {"day": 4, "in_month": true, "today": false, "weekend": true}
+        ],
+        [
+          {"day": 5, "in_month": true, "today": false, "weekend": false},
+          {"day": 6, "in_month": true, "today": false, "weekend": false},
+          {"day": 7, "in_month": true, "today": false, "weekend": false},
+          {"day": 8, "in_month": true, "today": false, "weekend": false},
+          {"day": 9, "in_month": true, "today": false, "weekend": false},
+          {"day": 10, "in_month": true, "today": false, "weekend": true},
+          {"day": 11, "in_month": true, "today": false, "weekend": true}
+        ],
+        [
+          {"day": 12, "in_month": true, "today": false, "weekend": false},
+          {"day": 13, "in_month": true, "today": true, "weekend": false},
+          {"day": 14, "in_month": true, "today": false, "weekend": false},
+          {"day": 15, "in_month": true, "today": false, "weekend": false},
+          {"day": 16, "in_month": true, "today": false, "weekend": false},
+          {"day": 17, "in_month": true, "today": false, "weekend": true},
+          {"day": 18, "in_month": true, "today": false, "weekend": true}
+        ],
+        [
+          {"day": 19, "in_month": true, "today": false, "weekend": false},
+          {"day": 20, "in_month": true, "today": false, "weekend": false},
+          {"day": 21, "in_month": true, "today": false, "weekend": false},
+          {"day": 22, "in_month": true, "today": false, "weekend": false},
+          {"day": 23, "in_month": true, "today": false, "weekend": false},
+          {"day": 24, "in_month": true, "today": false, "weekend": true},
+          {"day": 25, "in_month": true, "today": false, "weekend": true}
+        ],
+        [
+          {"day": 26, "in_month": true, "today": false, "weekend": false},
+          {"day": 27, "in_month": true, "today": false, "weekend": false},
+          {"day": 28, "in_month": true, "today": false, "weekend": false},
+          {"day": 29, "in_month": true, "today": false, "weekend": false},
+          {"day": 30, "in_month": true, "today": false, "weekend": false},
+          {"day": 31, "in_month": true, "today": false, "weekend": true},
+          {"day": 1, "in_month": false, "today": false, "weekend": true}
+        ]
+      ],
+      "week_of_year": 42,
+      "day_of_year": 286
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Pure offline Calendar.fetch / lunar_info, fixed local date 2026-10-13; includes month grid for 800x480."
+  },
+  {
+    "id": "weather-daily",
+    "source": "weather",
+    "title": "天气 · 五日预报",
+    "params": {
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "label": "上海 Shanghai",
+      "units": "celsius",
+      "layout": "daily"
+    },
+    "data": {
+      "label": "上海 Shanghai",
+      "condition": "Mainly clear",
+      "temp": "26",
+      "temp_unit": "°C",
+      "humidity": "60%",
+      "wind": "12 km/h",
+      "updated": "2026-10-13 11:00",
+      "days": [
+        {
+          "weekday": "Tue",
+          "date": "10/13",
+          "condition": "Fog",
+          "high": "27°",
+          "low": "20°",
+          "precip": "0%"
+        },
+        {
+          "weekday": "Wed",
+          "date": "10/14",
+          "condition": "Overcast",
+          "high": "24°",
+          "low": "18°",
+          "precip": "4%"
+        },
+        {
+          "weekday": "Thu",
+          "date": "10/15",
+          "condition": "Overcast",
+          "high": "25°",
+          "low": "16°",
+          "precip": "12%"
+        },
+        {
+          "weekday": "Fri",
+          "date": "10/16",
+          "condition": "Overcast",
+          "high": "28°",
+          "low": "20°",
+          "precip": "33%"
+        },
+        {
+          "weekday": "Sat",
+          "date": "10/17",
+          "condition": "Light drizzle",
+          "high": "30°",
+          "low": "21°",
+          "precip": "35%"
+        }
+      ]
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Parsed existing Open-Meteo capture tests/fixtures/weather/open_meteo_hourly_shanghai.json; observation 2026-10-13 11:00 Asia/Shanghai. Captured sample, not live weather."
+  },
+  {
+    "id": "weather-hourly",
+    "source": "weather",
+    "title": "天气 · 逐小时",
+    "params": {
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "label": "上海 Shanghai",
+      "units": "celsius",
+      "layout": "hourly"
+    },
+    "data": {
+      "label": "上海 Shanghai",
+      "condition": "Mainly clear",
+      "temp": "26",
+      "temp_unit": "°C",
+      "humidity": "60%",
+      "wind": "12 km/h",
+      "updated": "2026-10-13 11:00",
+      "days": [
+        {
+          "weekday": "Tue",
+          "date": "10/13",
+          "condition": "Fog",
+          "high": "27°",
+          "low": "20°",
+          "precip": "0%"
+        },
+        {
+          "weekday": "Wed",
+          "date": "10/14",
+          "condition": "Overcast",
+          "high": "24°",
+          "low": "18°",
+          "precip": "4%"
+        },
+        {
+          "weekday": "Thu",
+          "date": "10/15",
+          "condition": "Overcast",
+          "high": "25°",
+          "low": "16°",
+          "precip": "12%"
+        },
+        {
+          "weekday": "Fri",
+          "date": "10/16",
+          "condition": "Overcast",
+          "high": "28°",
+          "low": "20°",
+          "precip": "33%"
+        },
+        {
+          "weekday": "Sat",
+          "date": "10/17",
+          "condition": "Light drizzle",
+          "high": "30°",
+          "low": "21°",
+          "precip": "35%"
+        }
+      ],
+      "hours": [
+        {
+          "time": "12:00",
+          "interval": "11–12",
+          "temp": "27°",
+          "precip": "0%",
+          "amount": "0.0"
+        },
+        {
+          "time": "13:00",
+          "interval": "12–13",
+          "temp": "27°",
+          "precip": "0%",
+          "amount": "0.0"
+        },
+        {
+          "time": "14:00",
+          "interval": "13–14",
+          "temp": "27°",
+          "precip": "0%",
+          "amount": "0.0"
+        },
+        {
+          "time": "15:00",
+          "interval": "14–15",
+          "temp": "26°",
+          "precip": "0%",
+          "amount": "0.0"
+        },
+        {
+          "time": "16:00",
+          "interval": "15–16",
+          "temp": "26°",
+          "precip": "0%",
+          "amount": "0.0"
+        },
+        {
+          "time": "17:00",
+          "interval": "16–17",
+          "temp": "25°",
+          "precip": "0%",
+          "amount": "0.0"
+        }
+      ]
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Same existing Open-Meteo capture; first six hourly endpoints after fixed 2026-10-13 11:30. Captured sample, not live weather."
+  },
+  {
+    "id": "crypto",
+    "source": "crypto",
+    "title": "价格 · BTC / ETH / SOL",
+    "params": {
+      "symbols": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ],
+      "quote": "USD"
+    },
+    "data": {
+      "quote": "USD",
+      "coins": [
+        {
+          "symbol": "BTC",
+          "price": "83,621.00",
+          "change": "-54.60",
+          "change_pct": "-0.07%",
+          "direction": "down",
+          "high": "84,125.50",
+          "low": "82,716.10"
+        },
+        {
+          "symbol": "ETH",
+          "price": "2,542.69",
+          "change": "+8.34",
+          "change_pct": "+0.33%",
+          "direction": "up",
+          "high": "2,560.92",
+          "low": "2,495.31"
+        },
+        {
+          "symbol": "SOL",
+          "price": "111.64",
+          "change": "+0.41",
+          "change_pct": "+0.37%",
+          "direction": "up",
+          "high": "112.63",
+          "low": "108.86"
+        }
+      ]
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Parsed existing Kraken capture tests/fixtures/crypto/kraken_ticker.json; tests/test_crypto.py records capture 2026-10-12 11:10 Asia/Shanghai. Captured prices, not live quotes; render clock is fixed separately."
+  },
+  {
+    "id": "news-zh",
+    "source": "news",
+    "title": "中文资讯 · 三条示例标题",
+    "params": {
+      "feed": "https://example.invalid/font-gallery.xml",
+      "count": 3,
+      "label": "中文资讯 · 排版示例"
+    },
+    "data": {
+      "label": "中文资讯 · 排版示例",
+      "items": [
+        {
+          "title": "城市图书馆延长周末开放时间，新增夜间自习区域",
+          "source": "示例资讯",
+          "score": null,
+          "time": "10-13 09:20"
+        },
+        {
+          "title": "开源社区发布轻量工具，让旧设备也能运行本地应用",
+          "source": "示例科技",
+          "score": null,
+          "time": "10-13 10:05"
+        },
+        {
+          "title": "秋季骑行路线指南：沿河绿道新增休息站与饮水点",
+          "source": "示例生活",
+          "score": null,
+          "time": "10-13 11:00"
+        }
+      ]
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Synthetic Chinese display-demo headlines, written for layout comparison; not fetched, not factual or live news. title/source/score/time match News render contract."
+  },
+  {
+    "id": "poetry-zh",
+    "source": "poetry",
+    "title": "诗词 · 静夜思",
+    "params": {
+      "language": "zh"
+    },
+    "data": {
+      "id": "quiet-night",
+      "language": "zh",
+      "title": "静夜思",
+      "author": "李白",
+      "lines": [
+        "床前明月光，",
+        "疑是地上霜。",
+        "举头望明月，",
+        "低头思故乡。"
+      ],
+      "source": "https://zh.wikisource.org/w/index.php?title=靜夜思&oldid=8747585",
+      "edition": "唐诗三百首 · Simplified Chinese transcription",
+      "source_label": "Wikisource"
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Pure offline Poetry.fetch, fixed local date 2026-10-13, language=zh; full public-domain text and edition provenance from src/inkage/sources/poetry/poems.json."
+  },
+  {
+    "id": "poetry-en",
+    "source": "poetry",
+    "title": "诗词 · Rain",
+    "params": {
+      "language": "en"
+    },
+    "data": {
+      "id": "rain",
+      "language": "en",
+      "title": "Rain",
+      "author": "Robert Louis Stevenson",
+      "lines": [
+        "The rain is raining all around,",
+        "It falls on field and tree,",
+        "It rains on the umbrellas here,",
+        "And on the ships at sea."
+      ],
+      "source": "https://www.gutenberg.org/cache/epub/25609/pg25609-images.html#RAIN",
+      "edition": "A Child's Garden of Verses (1905)",
+      "source_label": "Project Gutenberg"
+    },
+    "now": "2026-10-13T11:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "provenance": "Pure offline Poetry.fetch, fixed local date 2026-10-13, language=en; full public-domain text and edition provenance from src/inkage/sources/poetry/poems.json."
+  }
+]

@@ -1,7 +1,43 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html><html><head><meta charset="utf-8"><style>
-body{width:250px;height:122px;box-sizing:border-box;padding:5px 8px;margin:0;background:{{ink.white}};color:{{ink.black}};font-family:"Noto Sans CJK SC","PingFang SC",sans-serif}
-.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.name{font-size:15px;font-weight:900;border-bottom:2px solid {{ink.black}}}.state{font-size:23px;line-height:1.3;font-weight:900;color:{{accent if data.alert else ink.black}}}.detail{font-size:12px;font-weight:700;line-height:1.4}.foot{font-size:10px;margin-top:4px}
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    width: 250px;
+    height: 122px;
+    box-sizing: border-box;
+    padding: 5px 8px;
+    margin: 0;
+    background: {{ink.white}};
+    color: {{ink.black}};
+    font-family: "Fusion Pixel 12";
+  }
+  .one {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .name {
+    font: 12px/16px "Fusion Pixel 12";
+    border-bottom: 2px solid {{ink.black}};
+  }
+  .state {
+    font: 24px/30px "Fusion Pixel 12";
+    color: {{accent if data.alert else ink.black}};
+  }
+  .detail {
+    font: 12px/16px "Fusion Pixel 12";
+  }
+  .foot {
+    font: 10px/14px "Fusion Pixel 10";
+    margin-top: 4px;
+  }
 </style></head><body><div class="name one">{{data.label}} · STATUS</div><div class="state one">{{data.headline}}</div>
 <div class="detail">{{data.affected}} affected · {{data.incidents|length}} open incidents</div><div class="detail one">{{data.incidents[0].name if data.incidents else data.description}}</div>
 <div class="foot">Checked {{data.checked}}</div></body></html>

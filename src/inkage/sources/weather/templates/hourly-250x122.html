@@ -1,10 +1,16 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html><html><head><meta charset="utf-8"><style>
-body { margin:0; width:250px; height:122px; padding:4px 8px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
-header { display:flex; justify-content:space-between; align-items:baseline; font-size:16px; font-weight:900; border-bottom:2px solid; }
-header span { font-size:11px; } .current { font-size:14px; font-weight:900; margin:3px 0; } .current b { color:{{ accent }}; }
-.hours { display:flex; } .hour { flex:1; text-align:center; border-left:1px solid; font-size:13px; font-weight:900; } .hour:first-child { border:0; }
-.rain { font-size:11px; font-weight:700; } footer { font-size:9px; font-weight:700; margin-top:3px; }
+* {font-synthesis:none;font-weight:400;letter-spacing:0;font-variant-ligatures:none}
+body {margin:0; width:250px; height:122px; padding:4px 8px; box-sizing:border-box; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Fusion Pixel 12"; font-size:12px; line-height:1.2;}
+header {display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid; font:16px/20px "Unifont";}
+header span {font:10px/12px "Fusion Pixel 10";}
+.current {margin:3px 0; font:12px/18px "Fusion Pixel 12";}
+.current b {color:{{ accent }}; font:12px/18px "Fusion Pixel 12";}
+.hours {display:flex;}
+.hour {flex:1; text-align:center; border-left:1px solid; font:12px/15px "Fusion Pixel 12";}
+.hour:first-child {border:0;}
+.rain {font:10px/14px "Fusion Pixel 10";}
+footer {margin-top:4px; font:10px/12px "Fusion Pixel 10";}
 </style></head><body>
 <header>{{ data.label }}<span>{{ data.updated[11:] }} · next 3h</span></header>
 <div class="current"><b>{{ data.temp }}{{ data.temp_unit }}</b> · {{ data.condition }}</div>

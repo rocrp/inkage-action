@@ -1,18 +1,92 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 <!doctype html><html><head><meta charset="utf-8"><style>
-body { margin:0; width:800px; height:480px; box-sizing:border-box; padding:24px 36px; background:{{ ink.white }}; color:{{ ink.black }}; font-family:"Noto Sans CJK SC","PingFang SC",sans-serif; }
-header { display:flex; justify-content:space-between; align-items:baseline; border-bottom:3px solid; padding-bottom:8px; font-weight:900; }
-.place { font-size:34px; } .date { font-size:20px; }
-.current { display:flex; align-items:center; height:174px; gap:28px; }
-.score { font-size:118px; font-weight:900; line-height:1; color:{{ accent }}; }
-.standard { font-size:22px; font-weight:900; } .status { font-size:28px; font-weight:900; margin:4px 0 9px; max-width:450px; line-height:1.15; }
-.pollutants { font-size:24px; font-weight:700; white-space:nowrap; }
-.title { font-size:19px; font-weight:900; margin:2px 0 8px; }
-.chart { display:flex; gap:11px; border-bottom:2px solid; height:139px; }
-.hour { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
-.value { font-size:17px; font-weight:900; } .bar { width:100%; background:{{ ink.black }}; margin-top:3px; min-height:2px; }
-.time { font-size:18px; font-weight:900; margin:3px 0; }
-footer { margin-top:12px; font-size:17px; font-weight:700; }
+  * {
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  body {
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
+    width: 800px;
+    height: 480px;
+    box-sizing: border-box;
+    padding: 16px 36px;
+    background: {{ ink.white }};
+    color: {{ ink.black }};
+    font-family: "Fusion Pixel 12";
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 3px solid;
+    padding-bottom: 8px;
+  }
+  .place {
+    font: 32px/38px "Unifont";
+  }
+  .date {
+    font: 20px/28px "Fusion Pixel 10";
+  }
+  .current {
+    display: flex;
+    align-items: center;
+    height: 118px;
+    gap: 28px;
+  }
+  .score {
+    font: 88px/106px "Departure Mono";
+    color: {{ accent }};
+  }
+  .standard {
+    font: 24px/30px "Fusion Pixel 12";
+  }
+  .status {
+    font: 24px/30px "Fusion Pixel 12";
+    margin: 4px 0 9px;
+    max-width: 450px;
+  }
+  .pollutants {
+    font: 24px/30px "Fusion Pixel 12";
+    white-space: nowrap;
+  }
+  .title {
+    font: 10px/14px "Fusion Pixel 10";
+    margin: 0 0 4px;
+  }
+  .chart {
+    display: flex;
+    gap: 11px;
+    border-bottom: 2px solid;
+    height: 139px;
+  }
+  .hour {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .value {
+    font: 11px/15px "Departure Mono";
+  }
+  .bar {
+    width: 100%;
+    background: {{ ink.black }};
+    margin-top: 3px;
+    min-height: 2px;
+  }
+  .time {
+    font: 11px/15px "Departure Mono";
+    margin: 3px 0;
+  }
+  footer {
+    font: 10px/14px "Fusion Pixel 10";
+    margin-top: 4px;
+  }
 </style></head><body>
 <header><span class="place">{{ data.label }} · Air quality</span><span class="date">{{ data.updated }}</span></header>
 <div class="current"><div class="score">{{ data.aqi }}</div><div><div class="standard">U.S. AQI</div><div class="status">{{ data.status }}</div><div class="pollutants">PM2.5 {{ data.pm25 }} · PM10 {{ data.pm10 }} μg/m³</div></div></div>
