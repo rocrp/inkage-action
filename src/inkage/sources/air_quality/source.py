@@ -1,10 +1,12 @@
 """CAMS model air-quality forecast via keyless Open-Meteo; explicit U.S. AQI."""
 
+import asyncio
 import math
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
+from loguru import logger
 
 from inkage.schedule import Schedule
 from inkage.source import Context, Source
@@ -31,17 +33,29 @@ class AirQuality(Source):
 
 async def fetch_air_quality(latitude: float, longitude: float) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=15.0) as client:
-        resp = await client.get(
-            URL,
-            params={
-                "latitude": latitude,
-                "longitude": longitude,
-                "current": "us_aqi,pm2_5,pm10",
-                "hourly": "us_aqi",
-                "forecast_days": 2,
-                "timezone": "auto",
-            },
-        )
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                resp = await client.get(
+                    URL,
+                    params={
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "current": "us_aqi,pm2_5,pm10",
+                        "hourly": "us_aqi",
+                        "forecast_days": 2,
+                        "timezone": "auto",
+                    },
+                )
+                break
+            except (httpx.ConnectError, httpx.ConnectTimeout) as error:
+                if attempt == 3:
+                    raise AirQualityError(
+                        f"Open-Meteo air quality: connection failed after 3 attempts ({type(error).__name__}) at {URL}"
+                    ) from error
+                logger.warning("Open-Meteo air quality: {} at {}; retrying in {}s", type(error).__name__, URL, attempt)
+                await asyncio.sleep(attempt)
         resp.raise_for_status()
         return resp.json()
 

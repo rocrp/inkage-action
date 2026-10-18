@@ -62,10 +62,14 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v4
         with:
+          # Earlier attempts retain their artifacts within the same workflow run.
+          name: github-pages-${{ github.run_attempt }}
           path: ${{ steps.inkage.outputs.dist }}
 
       - id: deploy
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
 
       - name: Keep the schedule alive
         if: inputs.keepalive && github.event_name == 'schedule'

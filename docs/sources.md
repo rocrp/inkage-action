@@ -31,6 +31,8 @@ panels = ["800x480-bwr", "250x122-bw"]
 - `weather.layout="daily"` remains default. `layout="hourly"` shows next six hourly intervals on 800×480, next three on 250×122. Temperature is at the interval end; probability and precipitation amount apply to the preceding hour. Both layouts accept existing location/units parameters. [Open-Meteo forecast API](https://open-meteo.com/en/docs).
 - `air_quality`: location parameters `latitude`, `longitude`, `label`; default Shanghai. **U.S. AQI**, PM2.5/PM10 in μg/m³, next 12 hours (large) or six (small). Explicitly a CAMS/Open-Meteo model forecast, not a local station observation or Chinese AQI. Local forecast time comes from the API; invalid/stale current values or incomplete hourly columns fail. [Air-quality API and attribution](https://open-meteo.com/en/docs/air-quality-api). Default 1 h.
 
+Air-quality connection errors/timeouts get at most three attempts, with 1 s and 2 s delays and the existing 15 s network timeout. HTTP rejections and invalid forecasts still fail immediately. Exhausted retries report the endpoint and error type; the previous Frame remains available. Retries mitigate transient connectivity, not a sustained upstream outage.
+
 ## Reading and art
 
 - `news` already accepts RSS/Atom URLs. Demo adds [少数派 RSS](https://sspai.com/feed) beside English Hacker News; additional feeds use additional instances, not new adapters.

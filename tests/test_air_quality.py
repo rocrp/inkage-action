@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import httpx
 import pytest
 
 from inkage.config import parse_config
@@ -106,3 +107,62 @@ def test_stale_and_future_forecast_rejected():
         parse(capture(), NOW + timedelta(hours=3))
     with pytest.raises(RuntimeError, match="stale or in the future"):
         parse(capture(), NOW - timedelta(hours=2))
+
+
+@pytest.fixture
+def skip_retry_delays(monkeypatch):
+    # These tests prove recovery/bounds; wall-clock backoff adds no coverage.
+    async def skip(_delay):
+        pass
+
+    monkeypatch.setattr(asyncio, "sleep", skip)
+
+
+@pytest.mark.parametrize("failure", [httpx.ConnectTimeout, httpx.ConnectError])
+def test_connection_failure_recovers_on_third_attempt(monkeypatch, failure, skip_retry_delays):
+    # Replay the captured connection failure, then deliver the real CAMS capture.
+    attempts = []
+
+    def handler(request):
+        attempts.append(request)
+        if len(attempts) < 3:
+            raise failure("", request=request)
+        return httpx.Response(200, content=FIX.read_bytes())
+
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
+    sc = source_config()
+    data = asyncio.run(sc.cls().fetch(context_for(sc, NOW)))
+    assert (data["aqi"], data["pm25"], data["updated"]) == (106, "31.5", "2026-10-13 11:00")
+    assert len(attempts) == 3
+
+
+def test_persistent_connection_timeout_is_bounded_and_names_endpoint(monkeypatch, skip_retry_delays):
+    attempts = []
+
+    def handler(request):
+        attempts.append(request)
+        raise httpx.ConnectTimeout("", request=request)
+
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
+    sc = source_config()
+    with pytest.raises(RuntimeError, match=r"3 attempts.*ConnectTimeout.*air-quality-api.open-meteo.com"):
+        asyncio.run(sc.cls().fetch(context_for(sc, NOW)))
+    assert len(attempts) == 3
+
+
+@pytest.mark.parametrize("status", [400, 403, 429])
+def test_http_rejection_is_not_retried_as_a_connection_failure(monkeypatch, status):
+    attempts = []
+
+    def handler(request):
+        attempts.append(request)
+        return httpx.Response(status, json={"error": True})
+
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
+    sc = source_config()
+    with pytest.raises(httpx.HTTPStatusError):
+        asyncio.run(sc.cls().fetch(context_for(sc, NOW)))
+    assert len(attempts) == 1
