@@ -14,6 +14,19 @@ data-to 2026-10-13 UTC. First tooltip 4 contributions on October 12th (level 1).
 are grouped by weekday, not chronological order. Inclusive range 367 days.
 Published counts may include anonymized private contributions; they are not commit counts.
 
+## Sunday rollover capture
+
+`contributions-sunday.html`: anonymous response from the same contributions endpoint,
+2026-10-18 10:14 UTC, Accept `text/html`, Accept-Language `en`; HTML with trailing line whitespace removed.
+Heading 24,380; metadata 2025-10-12–2026-10-18. Visible grid contains 365 days,
+2025-10-19–2026-10-18, totaling 24,325. First day: 3 (level 1); last: 157 (level 1).
+The original Oct 13 fixture's Oct 12–18, 2025 counts are 4, 18, 2, 9, 8, 12, 2:
+55 in total, exactly the summary/grid difference. This captured failure, not
+the parser's formula, is the rollover oracle. See the [research note](../../../docs/research/github-calendar-range-mismatch.md).
+
+SHA256 `contributions-sunday.html`:
+`c767282c885335c6b8e055daf8e59e0fc2752bab4301b237377ed105104e3081`.
+
 SHA256:
 
 ```

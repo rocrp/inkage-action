@@ -18,6 +18,7 @@ from inkage.sources.github_profile.calendar import CalendarError, Day, parse_cal
 
 FIX = Path(__file__).parent / "fixtures" / "github_profile"
 HTML = (FIX / "contributions.html").read_text()
+SUNDAY_HTML = (FIX / "contributions-sunday.html").read_text()
 NOW = datetime(2026, 10, 13, 10, tzinfo=UTC)
 
 
@@ -25,7 +26,7 @@ def source_config(**params):
     return parse_config({"sources": {"github_profile": {"panels": ["800x480-bwr"], **params}}}).sources[0]
 
 
-def fetched(monkeypatch, *, html=HTML, **params):
+def fetched(monkeypatch, *, html=HTML, now=NOW, **params):
     requests: list[httpx.Request] = []
     bodies = {
         "api.github.com": (FIX / "user.json").read_bytes(),
@@ -40,7 +41,7 @@ def fetched(monkeypatch, *, html=HTML, **params):
     real_client = httpx.AsyncClient
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: real_client(transport=httpx.MockTransport(handler), **kw))
     config = source_config(**params)
-    return asyncio.run(config.cls().fetch(context_for(config, NOW))), requests
+    return asyncio.run(config.cls().fetch(context_for(config, now))), requests
 
 
 def test_exact_annual_counts_from_real_calendar():
@@ -57,6 +58,87 @@ def test_exact_annual_counts_from_real_calendar():
         (Day(date(2026, 10, 11), 338, 4), Day(date(2026, 10, 12), 1225, 4), Day(date(2026, 10, 13), 459, 4)),
     )
     assert next(day for day in calendar.days if day.date == date(2026, 8, 23)) == Day(date(2026, 8, 23), 0, 0)
+
+
+def test_sunday_capture_keeps_summary_separate_from_visible_days():
+    calendar = parse_calendar(SUNDAY_HTML)
+    # Raw 2026-10-18 response: heading includes the prior week; grid starts Oct 19.
+    assert (calendar.summary.start, calendar.summary.end, calendar.summary.total) == (
+        date(2025, 10, 12),
+        date(2026, 10, 18),
+        24380,
+    )
+    assert (calendar.start, calendar.end, calendar.total, len(calendar.days)) == (
+        date(2025, 10, 19),
+        date(2026, 10, 18),
+        24325,
+        365,
+    )
+
+
+@pytest.mark.parametrize("stamp", ["2025-10-19", "2026-05-01", "2026-10-18"])
+def test_sunday_capture_still_rejects_missing_first_middle_or_last_day(stamp):
+    damaged = re.sub(rf'<td[^>]+data-date="{stamp}"[^>]*></td>', "", SUNDAY_HTML)
+    with pytest.raises(CalendarError, match="missing or out-of-range dates"):
+        parse_calendar(damaged)
+
+
+@pytest.mark.parametrize("pattern", [r"2025-10-(?:19|2[0-5])", r"\d{4}-\d{2}-\d{2}"])
+def test_sunday_capture_rejects_missing_whole_week_or_empty_grid(pattern):
+    damaged = re.sub(rf'<td[^>]+data-date="{pattern}"[^>]*></td>', "", SUNDAY_HTML)
+    with pytest.raises(CalendarError, match="missing"):
+        parse_calendar(damaged)
+
+
+def test_sunday_capture_rejects_duplicate_date_even_with_a_distinct_cell_id():
+    cell = re.search(r'<td[^>]+data-date="2025-10-19"[^>]*></td>', SUNDAY_HTML)[0]
+    duplicate = cell.replace('id="contribution-day-component-0-0"', 'id="duplicate-day"')
+    with pytest.raises(CalendarError, match="duplicate"):
+        parse_calendar(
+            SUNDAY_HTML + duplicate + '<tool-tip for="duplicate-day">3 contributions on October 19th.</tool-tip>'
+        )
+
+
+def test_sunday_summary_cannot_be_smaller_than_visible_total():
+    with pytest.raises(CalendarError, match="smaller than visible total"):
+        parse_calendar(SUNDAY_HTML.replace("24,380", "24,324"))
+
+
+def test_sunday_summary_may_equal_visible_total_when_hidden_week_has_no_activity():
+    calendar = parse_calendar(SUNDAY_HTML.replace("24,380", "24,325"))
+    assert calendar.summary.total == 24325
+
+
+def test_range_mismatch_error_reports_both_ranges_and_totals():
+    damaged = SUNDAY_HTML.replace("2025-10-12 00:00:00 UTC", "2025-10-13 00:00:00 UTC")
+    with pytest.raises(CalendarError) as error:
+        parse_calendar(damaged)
+    assert "summary=2025-10-13..2026-10-18 total=24380" in str(error.value)
+    assert "visible=2025-10-19..2026-10-18 days=365 total=24325" in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "layout,panel,expected_days,expected_start",
+    [
+        ("profile", "800x480-bwr", 365, "2025-10-19"),
+        ("profile", "250x122-bw", 85, "2026-07-26"),
+        ("isometric", "800x480-bw", 365, "2025-10-19"),
+        ("isometric", "800x480-spectra6", 365, "2025-10-19"),
+    ],
+)
+def test_sunday_render_shows_summary_total_and_actual_grid_dates(
+    monkeypatch, layout, panel, expected_days, expected_start
+):
+    from inkage.panel import PRESETS
+
+    now = datetime(2026, 10, 18, 10, tzinfo=UTC)
+    data, _ = fetched(monkeypatch, html=SUNDAY_HTML, now=now, layout=layout)
+    config = source_config(layout=layout)
+    html = config.cls().render(context_for(config, now), PRESETS[panel], data)
+    shown = re.findall(r"<title>(\d{4}-\d{2}-\d{2}):", html)
+    assert (len(shown), min(shown), max(shown)) == (expected_days, expected_start, "2026-10-18")
+    assert "24,380" in html and f"{expected_start} → 2026-10-18" in html
+    assert "2025-10-12" not in html
 
 
 def test_tooltip_variation_accepts_markup_whitespace_year_and_comma():

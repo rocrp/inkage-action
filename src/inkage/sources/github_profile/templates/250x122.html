@@ -57,6 +57,6 @@
   }
 </style></head><body>
 <div class="head"><img src="{{ data.avatar }}" alt=""><span class="name">@{{ data.username }}</span></div>
-<div class="body"><div><div class="number">{{ '{:,}'.format(data.recent_total) }}</div><div class="label">RECENT TOTAL</div><div class="annual">{{ '{:,}'.format(data.total) }} annual</div></div>{% include 'wall.html' %}</div>
+<div class="body"><div><div class="number">{{ '{:,}'.format(data.recent_total) }}</div><div class="label">RECENT TOTAL</div><div class="annual">{{ '{:,}'.format(data.summary_total) }} annual</div></div>{% include 'wall.html' %}</div>
 <div class="foot">{{ data.recent_start }} → {{ data.end }} · GitHub UTC</div>
 </body></html>

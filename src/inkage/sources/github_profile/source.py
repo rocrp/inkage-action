@@ -105,7 +105,7 @@ class GitHubProfile(Source):
         recent = tuple(day for day in calendar.days if day.date >= recent_start)
         view = {
             **data,
-            "total": calendar.total,
+            "summary_total": calendar.summary.total,
             "start": calendar.start.isoformat(),
             "end": calendar.end.isoformat(),
             "recent_total": sum(day.count for day in recent),

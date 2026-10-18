@@ -92,7 +92,7 @@
 </style></head><body>
 <div class="header"><img class="avatar" src="{{ data.avatar }}" alt=""><div class="identity"><div class="name">{{ data.name }}</div><div class="handle">@{{ data.username }}</div></div><div class="mark">GITHUB<br>{{ 'CONTRIBUTION LANDSCAPE' if data.wall.isometric else 'PUBLIC PROFILE' }}</div></div>
 <div class="bio">{{ data.bio or 'Public GitHub contributions' }}</div>
-<div class="stats"><div class="main"><span class="number">{{ '{:,}'.format(data.total) }}</span><span class="label">CONTRIBUTIONS</span></div><div><b>{{ '{:,}'.format(data.repos) }}</b><span class="label">REPOS</span></div><div><b>{{ '{:,}'.format(data.followers) }}</b><span class="label">FOLLOWERS</span></div></div>
+<div class="stats"><div class="main"><span class="number">{{ '{:,}'.format(data.summary_total) }}</span><span class="label">LAST YEAR</span></div><div><b>{{ '{:,}'.format(data.repos) }}</b><span class="label">REPOS</span></div><div><b>{{ '{:,}'.format(data.followers) }}</b><span class="label">FOLLOWERS</span></div></div>
 <div class="wall">{% include 'wall.html' %}</div>
 <div class="foot"><span>{% if data.wall.isometric %}Height: daily contributions · logarithmic scale{% else %}{{ data.start }} → {{ data.end }}{% endif %}</span><span>GitHub UTC cutoff · {{ data.end }}</span></div>
 <div style="font:10px/14px 'Fusion Pixel 10'; margin-top:5px; display:flex; justify-content:space-between"><span>Relative activity: empty → dots → diagonal → dense → solid</span><span>May include anonymized private contributions</span></div>

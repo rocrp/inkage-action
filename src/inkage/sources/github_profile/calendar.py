@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from html.parser import HTMLParser
 
+from loguru import logger
+
 
 @dataclass(frozen=True, slots=True)
 class Day:
@@ -14,11 +16,30 @@ class Day:
 
 
 @dataclass(frozen=True, slots=True)
-class Calendar:
+class Summary:
+    """GitHub's published range and total, which may include an undisplayed week."""
+
     start: date
     end: date
     total: int
+
+
+@dataclass(frozen=True, slots=True)
+class Calendar:
+    summary: Summary
     days: tuple[Day, ...]
+
+    @property
+    def start(self) -> date:
+        return self.days[0].date
+
+    @property
+    def end(self) -> date:
+        return self.days[-1].date
+
+    @property
+    def total(self) -> int:
+        return sum(day.count for day in self.days)
 
 
 class CalendarError(ValueError):
@@ -92,8 +113,31 @@ _MONTHS = {
 _TOOLTIP = re.compile(r"(No|[\d,]+) contributions? on ([A-Z][a-z]+) (\d{1,2})(?:st|nd|rd|th)?(?:, (\d{4}))?\.?")
 
 
+def _checked_calendar(summary: Summary, days: tuple[Day, ...]) -> Calendar:
+    details = f"summary={summary.start}..{summary.end} total={summary.total}"
+    if not days:
+        raise CalendarError(f"GitHub calendar: missing daily cells; {details}; visible=empty")
+    calendar = Calendar(summary, days)
+    details += f"; visible={calendar.start}..{calendar.end} days={len(days)} total={calendar.total}"
+    # Supported observed rollover: a complete 53-column Sunday-first grid,
+    # while the published summary still includes the preceding whole week.
+    grid_start = summary.end - timedelta(weeks=52, days=(summary.end.weekday() + 1) % 7)
+    rolled = calendar.start == summary.start + timedelta(weeks=1) and calendar.start == grid_start
+    expected_start = grid_start if rolled else summary.start
+    expected = [expected_start + timedelta(days=i) for i in range((summary.end - expected_start).days + 1)]
+    if [day.date for day in days] != expected:
+        raise CalendarError(f"GitHub calendar: duplicate, missing or out-of-range dates; {details}")
+    if not rolled and calendar.total != summary.total:
+        raise CalendarError(f"GitHub calendar: daily counts disagree with annual total; {details}")
+    if rolled:
+        if summary.total < calendar.total:
+            raise CalendarError(f"GitHub calendar: summary total is smaller than visible total; {details}")
+        logger.info("GitHub calendar: summary includes preceding week; {}", details)
+    return calendar
+
+
 def parse_calendar(html: str) -> Calendar:
-    """Reject incomplete/changed pages; totals and dates must agree independently."""
+    """Validate daily coverage separately from GitHub's published summary."""
     parser = CalendarParser()
     try:
         parser.feed(html)
@@ -117,13 +161,8 @@ def parse_calendar(html: str) -> Calendar:
                 raise CalendarError(f"GitHub calendar: activity level disagrees with count for {stamp}")
             days.append(Day(stamp, value, level))
         days.sort(key=lambda d: d.date)
-        expected = [start + timedelta(days=i) for i in range((end - start).days + 1)]
-        if [d.date for d in days] != expected:
-            raise CalendarError("GitHub calendar: duplicate, missing or out-of-range dates")
         total = int(heading[1].replace(",", ""))
-        if sum(d.count for d in days) != total:
-            raise CalendarError("GitHub calendar: daily counts disagree with annual total")
-        return Calendar(start, end, total, tuple(days))
+        return _checked_calendar(Summary(start, end, total), tuple(days))
     except (ValueError, KeyError) as error:
         if isinstance(error, CalendarError):
             raise
