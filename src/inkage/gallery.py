@@ -8,6 +8,7 @@ from inkage.site import MANIFEST, Entry, Manifest, encoder_path, frame_path, pre
 
 # Rewrites every <time datetime> to relative text with a local-time title; marks Overdue (next_due + 10 min).
 # The 10 min grace is defined here and nowhere else. No requests, no external resources.
+# An overdue publication cannot distinguish a stopped Chain from a failed or unserved deployment.
 SCRIPT = """<script>
 const now = Date.now(), GRACE = 10 * 60e3;
 const span = (s) =>
@@ -21,7 +22,7 @@ for (const t of document.querySelectorAll("time[datetime]")) {
   if (next && now > at + GRACE) {
     const p = t.closest("p");
     p.classList.add("overdue");
-    if (p.classList.contains("heartbeat")) t.after(" · chain broken, cron will recover");
+    if (p.classList.contains("heartbeat")) t.after(" · publication overdue; check workflow runs");
   }
 }
 </script>"""
