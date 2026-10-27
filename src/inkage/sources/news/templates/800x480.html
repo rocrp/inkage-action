@@ -1,5 +1,6 @@
 {%- set accent = ink.red if 'red' in panel.inks else ink.black -%}
 {%- set n = data["items"] | length -%}
+{%- if panel.size == (528, 792) %}{% set n = [n, 8] | min %}{% endif -%}
 {%- set cols = 2 if n > 4 else 1 -%}
 {%- set rows = ((n + cols - 1) // cols) -%}
 <!doctype html>
@@ -15,14 +16,27 @@ body {width:800px; height:480px; margin:0; background:{{ ink.white }}; color:{{ 
 .body {flex:1; min-width:0;}
 .title {overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; font:24px/30px "Fusion Pixel 12";}
 .meta {margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:20px/28px "Fusion Pixel 10";}
+
+{% if panel.size == (528, 792) %}
+body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
+.head {display:block}
+.time {display:block; margin:8px 0 0; font-size:10px; line-height:14px}
+.list {grid-auto-flow:row; grid-template-columns:1fr; grid-template-rows:repeat({{ n }},minmax(0,1fr)); column-gap:0}
+.item {padding-top:4px}
+.num {width:30px; flex-shrink:0; font-size:24px; line-height:30px}
+.title {font-size:24px; line-height:30px}
+.meta {font-size:10px; line-height:14px}
+.more {font:10px/16px "Fusion Pixel 10"; padding-top:8px}
+{% endif %}
 </style></head><body>
   <div class="head"><span class="label">{{ data.label }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
   <div class="list">
-  {%- for it in data["items"] %}
+  {%- for it in data["items"][:n] %}
     <div class="item"><div class="num">{{ loop.index }}</div><div class="body">
       <div class="title">{{ it.title }}</div>
       <div class="meta">{% if it.score is not none %}{{ it.score }} pts · {% endif %}{{ it.source }}{% if it.time %} · {{ it.time }}{% endif %}</div>
     </div></div>
   {%- endfor %}
   </div>
+  {% if panel.size == (528, 792) and data["items"] | length > n %}<div class="more">Showing {{ n }} of {{ data["items"] | length }} stories</div>{% endif %}
 </body></html>

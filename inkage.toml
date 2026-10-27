@@ -7,105 +7,105 @@ preset = "800x480-spectra6"
 encoders = ["pcim"]
 
 [sources.calendar]
-panels = ["800x480-bwr", "250x122-bwr", "800x480-spectra6"]
+panels = ["800x480-bwr", "250x122-bwr", "800x480-spectra6", "528x792-bw"]
 schedule = { at = ["00:05"] }
 
 # CSI 300 alone, 5 min during Shanghai trading hours (the Source's default Schedule).
 [sources.index]
 symbols = ["sh000300"]
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 # Several symbols on one Frame = a Watchlist table.
 [sources.cn-watch]
 source = "index"
 symbols = ["sh000300", "sh000001", "sz399006"]
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.stock]
 symbols = ["AAPL", "NVDA", "MSFT", "TSLA"]
-panels = ["800x480-spectra6"]
+panels = ["800x480-spectra6", "528x792-bw"]
 
 # 24/7 every 5 minutes: the live proof that the Chain refreshes on time.
 [sources.crypto]
 symbols = ["BTC", "ETH", "SOL"]
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.weather]
 label = "Shanghai"
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.weather-hourly]
 source = "weather"
 layout = "hourly"
 label = "Shanghai"
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.air_quality]
 label = "Shanghai"
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.fx]
 base = "USD"
 symbols = ["CNY", "EUR", "JPY", "GBP"]
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.astro]
 label = "Shanghai"
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.github]
 repo = "rocrp/inkage-action"
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.github_ci]
 repo = "rocrp/inkage-action"
 branch = "main"
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.status]
 url = "https://www.githubstatus.com"
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 [sources.github_profile]
 username = "RoCry"
-panels = ["800x480-bwr", "250x122-bw"]
+panels = ["800x480-bwr", "250x122-bw", "528x792-bw"]
 
 [sources.github-wall]
 source = "github_profile"
 username = "RoCry"
 layout = "isometric"
-panels = ["800x480-bw", "800x480-spectra6"]
+panels = ["800x480-bw", "800x480-spectra6", "528x792-bw"]
 
 [sources.news]
 feed = "hn"
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.news-zh]
 source = "news"
 feed = "https://sspai.com/feed"
 label = "少数派"
-panels = ["800x480-bwr"]
+panels = ["800x480-bwr", "528x792-bw"]
 
 [sources.poetry-en]
 source = "poetry"
 language = "en"
-panels = ["800x480-bwr", "250x122-bw"]
+panels = ["800x480-bwr", "250x122-bw", "528x792-bw"]
 
 [sources.poetry-zh]
 source = "poetry"
 language = "zh"
-panels = ["800x480-bwr", "250x122-bw"]
+panels = ["800x480-bwr", "250x122-bw", "528x792-bw"]
 
 [sources.art]
-panels = ["800x480-spectra6", "250x122-bw"]
+panels = ["800x480-spectra6", "250x122-bw", "528x792-bw"]
 
 [sources.countdown]
 events = [
   { title = "New Year", date = "2027-01-01", repeat = "yearly" },
   { title = "Spring Festival", date = "2027-02-06" },
 ]
-panels = ["800x480-bwr", "250x122-bwr"]
+panels = ["800x480-bwr", "250x122-bwr", "528x792-bw"]
 
 # Bing's photo of the day, dithered for Spectra 6.
 [sources.photo]
-panels = ["800x480-spectra6"]
+panels = ["800x480-spectra6", "528x792-bw"]

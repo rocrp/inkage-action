@@ -1,6 +1,9 @@
 """Gallery structure against a hand-built Manifest: one section and one Freshness line per Source."""
 
+import asyncio
 import re
+
+from playwright.async_api import async_playwright
 
 from inkage.gallery import gallery_html
 from inkage.site import Entry, Manifest
@@ -74,3 +77,26 @@ def test_gallery_has_no_url_code_and_only_relative_refs():
     assert "<code>" not in page
     refs = re.findall(r'(?:src|href)="([^"]*)"', page)
     assert refs and all("://" not in r for r in refs)
+
+
+def test_copy_image_url_uses_canonical_png_and_site_base():
+    async def verify():
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch()
+            try:
+                page = await browser.new_page()
+                await page.set_content(
+                    gallery_html(MANIFEST).replace("<head>", '<head><base href="https://example.org/inkage/">')
+                )
+                await page.evaluate("""() => Object.defineProperty(navigator, 'clipboard', {
+                    value: {writeText: async text => {window.copied = text;}}
+                })""")
+                buttons = page.get_by_role("button", name="Copy image URL", exact=True)
+                assert await buttons.count() == 2  # Failed first generation has no image to copy.
+                await buttons.first.click()
+                assert await page.evaluate("window.copied") == "https://example.org/inkage/calendar/800x480-bwr.png"
+                assert await buttons.count() == 1
+            finally:
+                await browser.close()
+
+    asyncio.run(verify())

@@ -83,6 +83,15 @@
     justify-content: space-between;
     margin-top: 10px;
   }
+
+{% if panel.size == (528, 792) %}
+body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
+h1 {font-size:24px; line-height:30px; margin:20px 0 12px}
+.grid {grid-template-columns:1fr}
+.component {height:36px}
+.foot {display:block}
+.foot span {display:block; margin-top:4px}
+{% endif %}
 </style></head><body>
 <div class="top"><b class="one">{{data.label}}</b><span>SERVICE STATUS</span></div>
 <h1>{{data.headline}}</h1><div class="description one">{{data.description}}</div>

@@ -25,6 +25,17 @@ for (const t of document.querySelectorAll("time[datetime]")) {
     if (p.classList.contains("heartbeat")) t.after(" · publication overdue; check workflow runs");
   }
 }
+for (const button of document.querySelectorAll("button[data-frame]")) {
+  button.addEventListener("click", async () => {
+    const url = new URL(button.dataset.frame, document.baseURI).href;
+    try {
+      await navigator.clipboard.writeText(url);
+      button.textContent = "Copied image URL";
+    } catch {
+      window.prompt("Copy image URL", url);
+    }
+  });
+}
 </script>"""
 
 STYLE = """<style>
@@ -37,6 +48,7 @@ section{margin-bottom:24px} h2{font-size:16px;margin:0 0 4px}
 figure{margin:0;padding:12px;background:var(--card);border-radius:8px}
 img{max-width:100%;border:1px solid var(--muted)}
 figcaption{margin-top:8px;color:var(--muted);word-break:break-all} figcaption a:first-child{color:var(--fg)}
+button[data-frame]{display:block;margin-top:8px;padding:6px 10px;cursor:pointer;font:inherit}
 .error{color:var(--err);margin:0 0 8px} .missing{padding:32px;text-align:center;border:1px dashed var(--muted)}
 </style>"""
 
@@ -58,7 +70,12 @@ def _card(e: Entry) -> str:
     links = [_link(frame_path(e.source, e.panel), e.panel)]
     links += [_link(encoder_path(e.source, e.panel, name), name) for name in e.encoders]
     links.append(_link(sidecar_path(e.source, e.panel), "json"))
-    return f"<figure>{img}<figcaption>{' · '.join(links)}</figcaption></figure>"
+    copy = (
+        f'<button type="button" data-frame="{escape(frame_path(e.source, e.panel))}">Copy image URL</button>'
+        if e.sha256
+        else ""
+    )
+    return f"<figure>{img}<figcaption>{' · '.join(links)}{copy}</figcaption></figure>"
 
 
 def _errors(entries: list[Entry]) -> str:

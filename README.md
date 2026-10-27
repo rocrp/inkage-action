@@ -108,10 +108,10 @@ dither = { method = "atkinson", serpentine = true, strength = 0.8, distance = "y
 ```
 
 - **Schedule**: `every` (+ optional `window` and `fallback`; no fallback = no refresh outside the window) or `at = ["00:05", "12:00"]`, never both. A window crossing midnight belongs to the weekday it starts on. Four minutes of tolerance absorb Run jitter: a late Run followed by an on-time one never skips a cycle. `every = "1m"` works (a Run takes about a minute), but every regeneration is a Pages deploy and, on the device, an e-paper refresh; 5 minutes is the sensible floor for prices.
-- **Presets**: `{250x122,296x128,400x300,648x480,800x480}-{bw,bwr,bwry}`, `800x480-spectra6`, `400x600-spectra6`.
+- **Presets**: `{250x122,296x128,400x300,648x480,800x480}-{bw,bwr,bwry}`, `800x480-spectra6`, `400x600-spectra6`, `528x792-bw` (Wodle portrait).
 - **Dither**: `threshold` (nearest color, default for UI), `floyd-steinberg`, `atkinson`, `stucki`, `jjn`, `burkes`, `sierra`, `bayer4`, `bayer8`; options `serpentine`, `strength` (0–2), `distance` (`rgb` | `ycbcr`).
 
-Built-in Sources (all key-less; every one has 800×480 and 250×122 layouts unless noted):
+Built-in Sources (all key-less; every one has 800×480, 250×122 and Wodle 528×792 portrait layouts unless noted):
 
 | Source | What | Default Schedule | Params |
 |---|---|---|---|
@@ -147,6 +147,8 @@ index.html                      gallery
 ```
 
 Devices: fetch the Sidecar (or Manifest), compare `sha256`, download the PNG with `If-None-Match`, sleep until about `retry_at` (if present) or `next_due` plus a minute (Run overhead; after a broken chain the cron's recovery takes hours). Every `url` is Site-relative: join it with the base you fetched the Manifest from, so a mirror of the Site works unchanged. A Source that fails keeps its previous Frame and original freshness timestamps, gets `error` and an independent scheduled `retry_at`, and fails the workflow run after the Site is deployed. A successful deployment still continues the Chain; retries wait for their due time, so a persistent upstream failure cannot trigger immediate redispatch loops.
+
+For URL-based standby screens, use **Copy image URL** in the Gallery. It copies the canonical PNG's absolute URL (`<source>/<panel>.png`), stable across updates. The visible thumbnail is an RGB Preview; its URL is for humans. The demo publishes `528x792-bw` for every Source instance; text layouts reflow vertically, photographs fill the portrait, museum art retains the entire work. BW uses two palette entries, with photographs dithered to black and white; native grayscale is not part of the Inkage palette contract.
 
 **pcim**: 16-byte little-endian header `"PCIM"`, version `1`, bpp `4`, palette count, reserved `0`, width u16, height u16, payload length u32; then 4bpp pixels, high nibble first, rows padded to a whole byte.
 

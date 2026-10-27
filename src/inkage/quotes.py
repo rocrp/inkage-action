@@ -112,7 +112,7 @@ def _direction(change: float) -> str:
 class QuoteSource(Source):
     """Shared fetch + layout. Subclasses set ``market``, ``code()``, ``label()`` and the color convention."""
 
-    sizes = ((800, 480), (250, 122))
+    sizes = ((800, 480), (250, 122), (528, 792))
     dither = "threshold"
     fields = ("name", "price", "change", "change_pct", "time", "quotes")
     market: ClassVar[Market]

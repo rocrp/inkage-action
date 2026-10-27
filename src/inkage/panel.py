@@ -103,5 +103,6 @@ PRESETS: dict[str, Panel] = {
         ),
         _preset(800, 480, "spectra6"),
         _preset(400, 600, "spectra6"),
+        _preset(528, 792, "bw"),
     )
 }

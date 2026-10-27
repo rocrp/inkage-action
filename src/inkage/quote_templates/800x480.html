@@ -75,6 +75,23 @@
     text-overflow: ellipsis;
     max-width: 300px;
   }
+
+{% if panel.size == (528, 792) %}
+body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
+.head {display:block}
+.name {font-size:32px; line-height:40px}
+.code {display:block; margin-top:12px}
+.price {font-size:77px; line-height:96px; margin-top:70px}
+.chg {font-size:24px; line-height:36px; margin-top:24px}
+.foot {left:24px; right:24px; bottom:24px; display:block; font-size:10px; line-height:18px; white-space:normal}
+.foot span {display:block}
+table {font-size:24px; line-height:30px}
+td {padding:18px 0}
+td.num {font-size:22px; line-height:30px; padding-left:8px}
+td.n {max-width:140px}
+td:nth-child(3) {display:none}
+.direction {font-size:12px; line-height:16px}
+{% endif %}
 </style></head><body>
 {% if data.quotes | length > 1 %}
   <table>

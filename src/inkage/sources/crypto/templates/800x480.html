@@ -18,6 +18,19 @@ body {width:800px; height:480px; margin:0; background:{{ ink.white }}; color:{{ 
 .chg {width:{{ 230 if big else 210 }}px; text-align:right; font-weight:400; line-height:1.1;}
 .chg .pct {font:24px/30px "Fusion Pixel 12";}
 .chg .abs {font:22px/28px "Departure Mono";}
+
+{% if panel.size == (528, 792) %}
+body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
+.head {display:block}
+.title,.time {display:block}
+.time {font-size:10px; line-height:14px; margin-top:8px}
+.row {display:grid; grid-template-columns:120px minmax(0,1fr); padding:12px 0}
+.sym {width:auto; grid-row:1 / 3}
+.price {font-size:33px; line-height:40px}
+.chg {width:auto; display:flex; justify-content:flex-end; gap:12px}
+.chg .pct {font-size:12px; line-height:16px}
+.chg .abs {font-size:11px; line-height:16px}
+{% endif %}
 </style></head><body>
   <div class="head"><span class="title">CRYPTO · {{ data.quote }}</span><span class="time">{{ now.strftime("%m-%d %H:%M") }}</span></div>
   <div class="rows">

@@ -20,6 +20,9 @@ def test_catalog_covers_spec_sizes():
             assert f"{w}x{h}-{palette}" in PRESETS
     for w, h in SPEC_SPECTRA6:
         assert f"{w}x{h}-spectra6" in PRESETS
+    # Wodle controller geometry: 528 gate lines horizontally, 792 source pixels vertically.
+    wodle = PRESETS["528x792-bw"]
+    assert (wodle.width, wodle.height, wodle.palette) == (528, 792, "bw")
 
 
 def test_every_preset_palette_is_ink_order_prefix_with_white_at_1():

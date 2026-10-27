@@ -1,7 +1,7 @@
 """Offline browser acceptance for bundled typography, not source business logic.
 
 Captured provider inputs plus all complete bundled poems exercise every built-in
-text layout at both panel sizes. This catches real font fallback, fractional
+text layout at all panel sizes. This catches real font fallback, fractional
 pixel scaling and clipped text that HTML-string assertions cannot detect.
 """
 
@@ -115,6 +115,13 @@ async def samples(registry):
             )
         for mode, selected in (("single", rows[:1]), ("watch", rows)):
             add(name, {**selected[0], "quotes": selected}, f"-{mode}")
+    # News accepts up to 30 stories; portrait must show a readable first eight
+    # and an explicit count, rather than squeeze 30 rows below the panel edge.
+    title, items = registry["news"].fetch.__globals__["feed_items"](
+        (FIX / "news/hn_rss.xml").read_bytes(), 30, context("news")
+    )
+    add("news", {"label": title, "items": items}, "-thirty")
+    cases[-1]["panels"] = ("528x792-bw",)
     return cases
 
 
@@ -227,7 +234,7 @@ def test_builtin_pixel_typography_renders_offline_without_fallback_or_clipping(t
             for sample in cases:
                 source = registry[sample["source"]]()
                 ctx = Context(now=NOW, tz=ZoneInfo("Asia/Shanghai"), params={**source.params, **sample["params"]})
-                for size in ("250x122-bwr", "800x480-bwr"):
+                for size in sample.get("panels", ("250x122-bwr", "800x480-bwr", "528x792-bw")):
                     panel = PRESETS[size]
                     html = source.render(ctx, panel, sample["data"])
                     complete_lines = sample["data"]["lines"] if sample["source"] == "poetry" else ()
