@@ -71,15 +71,6 @@
     margin-top: auto;
     padding-top: 10px;
   }
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-h1 {font-size:24px; line-height:30px}
-.run {grid-template-columns:1fr; gap:8px; padding:16px 0}
-.state {justify-self:start; padding:4px 10px}
-.foot {display:block}
-.foot span {display:block; margin-top:4px}
-{% endif %}
 </style></head><body><div class="kicker">GITHUB ACTIONS</div><h1 class="one">{{data.repo}}</h1>
 {% if data.runs %}<div class="list">{% for run in data.runs %}<div class="run"><div><div class="name one">{{run.name}}</div><div class="meta one">{{run.branch}} · {{run.sha}} · {{run.updated}}</div></div><div class="state {% if run.failed %}failed{% endif %}">{{run.state}}</div></div>{% endfor %}</div>{% else %}<div class="empty">No workflow runs{% if data.branch %} on {{data.branch}}{% endif %}</div>{% endif %}
 <div class="foot"><span>Latest {{data.runs|length}} run{% if data.runs|length != 1 %}s{% endif %}{% if data.branch %} · {{data.branch}}{% endif %}</span><span>Checked {{data.checked}}</span></div></body></html>

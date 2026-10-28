@@ -125,14 +125,6 @@ def test_bad_count_raises(monkeypatch):
         fetched(monkeypatch, source_config(count=0))
 
 
-def test_portrait_limits_headlines_with_explicit_remaining_count(monkeypatch):
-    sc = source_config(panel="528x792-bw", feed=RSS_URL, count=30)
-    data, _ = fetched(monkeypatch, sc)
-    html = sc.cls().render(context_for(sc, NOW), sc.panels[0], data)
-    assert html.count('<div class="item">') == 8
-    assert "Showing 8 of 30 stories" in html
-
-
 def test_e2e_frame_800x480_bwr(monkeypatch):
     sc = source_config(feed=RSS_URL)
     data, _ = fetched(monkeypatch, sc)

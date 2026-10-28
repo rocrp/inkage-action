@@ -24,13 +24,6 @@ def test_cli_validate_prints_default_pairs():
     assert "calendar" in out and "800x480-bwr" in out and "250x122-bwr" in out and "800x480-spectra6" in out
 
 
-def test_demo_publishes_native_portrait_for_every_source_instance():
-    cfg = load_config(ROOT / "inkage.toml")
-    assert {source.id for source in cfg.sources if any(panel.id == "528x792-bw" for panel in source.panels)} == {
-        source.id for source in cfg.sources
-    }
-
-
 def test_cli_validate_exits_nonzero_on_error(tmp_path):
     cfg = write(tmp_path, "[sources.calendar]\npanels = ['nope']\n")
     res = subprocess.run(["uv", "run", "inkage", "validate", str(cfg)], cwd=ROOT, capture_output=True, text=True)

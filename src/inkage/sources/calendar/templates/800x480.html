@@ -19,19 +19,6 @@ td.out {color:{{ ink.white }};}
 td.we {color:{{ accent }};}
 td.today span {background:{{ accent }}; color:{{ ink.white }}; padding:2px 8px;}
 .fest {margin-top:12px; color:{{ accent }}; font:24px/28px "Fusion Pixel 12";}
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-body {flex-direction:column}
-.left {width:100%; height:400px; flex-shrink:0; border-right:0; border-bottom:3px solid}
-.day {font-size:144px}
-.lunar {font:24px/30px "Fusion Pixel 12"; margin-top:8px}
-.right {width:100%; padding:16px 24px}
-.mtitle {font:24px/30px "Fusion Pixel 12"; margin-bottom:8px}
-table {table-layout:fixed}
-td {height:42px}
-.fest {font-size:12px; line-height:16px; margin-top:6px}
-{% endif %}
 </style></head><body>
   <div class="left">
     <div class="ym">{{ data.year }}年{{ data.month }}月</div>

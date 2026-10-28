@@ -87,19 +87,6 @@
     font: 22px/28px "Departure Mono";
     margin-top: 6px;
   }
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-.head {display:block}
-.label,.date {display:block}
-.date {font-size:10px; line-height:14px; margin-top:8px}
-.main {display:block}
-.v {font-size:44px}
-td {font-size:24px; padding-top:8px}
-td.t {padding-right:0}
-.moon {width:100%; border-left:0; border-top:3px solid; padding:20px 0 0; margin-top:20px}
-.mname {margin-top:12px}
-{% endif %}
 </style></head><body>
   <div class="head"><span class="label">{{ data.label }}</span><span class="date">{{ data.date.strftime("%a %Y-%m-%d") }}</span></div>
   <div class="main">

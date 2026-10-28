@@ -13,7 +13,7 @@ WEEKDAYS_ZH = ("一", "二", "三", "四", "五", "六", "日")
 
 
 class Calendar(Source):
-    sizes = ((800, 480), (250, 122), (528, 792))
+    sizes = ((800, 480), (250, 122))
     schedule = Schedule.parse({"at": ["00:05"]})
     dither = "threshold"
     fields = ("date", "weekday", "lunar_month", "lunar_day", "year_ganzhi")

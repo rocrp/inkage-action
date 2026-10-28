@@ -11,17 +11,6 @@ footer {border-top:1px solid {{ ink.black }}; padding-top:10px; display:flex; ju
 .author {font:20px/28px "Fusion Pixel 10";}
 .source {font:20px/28px "Fusion Pixel 10";}
 html[lang="en"] .line {font:22px/36px "Departure Mono";}
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-body {padding:28px 24px}
-header,footer {display:block; font-size:10px; line-height:16px}
-header span,footer span {display:block}
-h1 {font-size:32px; line-height:40px}
-.line {font-size:32px; line-height:48px}
-html[lang="en"] .line {font-size:22px; line-height:36px; overflow-wrap:anywhere}
-.author,.source {font-size:10px; line-height:16px}
-{% endif %}
 </style></head><body>
 <header><span>DAILY POETRY</span><span>{{ now.strftime('%d %b %Y') }}</span></header>
 <main><h1>{{ data.title }}</h1>{% for line in data.lines %}<div class="line">{{ line }}</div>{% endfor %}</main>

@@ -45,13 +45,6 @@
     font: 10px/14px "Fusion Pixel 10";
     margin-top: 5px;
   }
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-.work {height:590px}
-.caption {margin-top:16px}
-.title {font-size:24px; line-height:30px; overflow-wrap:anywhere}
-{% endif %}
 </style></head><body>
 <div class="work"><img src="{{ data.image_uri }}" alt="{{ data.title }}"></div>
 <div class="caption"><div class="title">{{ data.title }}</div>

@@ -89,25 +89,6 @@
     justify-content: space-between;
     align-items: center;
   }
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-.header {height:auto; flex-wrap:wrap}
-.avatar {width:64px; height:64px}
-.name {font-size:24px; line-height:30px}
-.handle {font-size:12px; line-height:16px}
-.mark {width:100%; text-align:left; margin-top:0}
-.mark br {display:none}
-.bio {height:auto; white-space:normal; line-height:20px; margin:20px 0}
-.stats {flex-wrap:wrap; gap:16px; margin-bottom:30px}
-.stats .main {width:100%}
-.wall {height:270px; display:flex; align-items:center}
-.wall svg {width:100%; height:auto}
-.foot {display:block; line-height:18px}
-.foot span {display:block}
-body > div:last-child {display:block!important; line-height:18px!important}
-body > div:last-child span {display:block}
-{% endif %}
 </style></head><body>
 <div class="header"><img class="avatar" src="{{ data.avatar }}" alt=""><div class="identity"><div class="name">{{ data.name }}</div><div class="handle">@{{ data.username }}</div></div><div class="mark">GITHUB<br>{{ 'CONTRIBUTION LANDSCAPE' if data.wall.isometric else 'PUBLIC PROFILE' }}</div></div>
 <div class="bio">{{ data.bio or 'Public GitHub contributions' }}</div>

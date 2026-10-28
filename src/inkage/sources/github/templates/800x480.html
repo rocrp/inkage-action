@@ -94,19 +94,6 @@
   .foot b {
     color: {{ accent }};
   }
-
-{% if panel.size == (528, 792) %}
-body {width:528px; height:792px; margin:0; padding:24px; box-sizing:border-box}
-.repo {font-size:24px; line-height:30px}
-.desc {font-size:12px; line-height:16px; margin-top:12px}
-.stats {margin:24px 0}
-.stat b {font-size:33px; line-height:40px}
-.stat span {font-size:12px; line-height:16px}
-.meta {font-size:10px; line-height:14px}
-.msg {-webkit-line-clamp:8; margin-top:16px}
-.foot {display:block; white-space:normal; font-size:10px; line-height:16px}
-.foot span {display:block}
-{% endif %}
 </style></head><body>
   <div class="head">
     <div class="repo one">{{ data.repo }}</div>
