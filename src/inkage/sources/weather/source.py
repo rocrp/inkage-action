@@ -4,6 +4,7 @@
 in the location's local zone (``utc_offset_seconds`` beside them).
 """
 
+import itertools
 import math
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
@@ -162,7 +163,7 @@ def parse_hourly(raw: dict[str, Any], now: datetime) -> list[dict[str, str]]:
         times = [datetime.fromisoformat(t).replace(tzinfo=tz) for t in hourly["time"]]
     except (KeyError, TypeError, ValueError):
         raise WeatherError("Open-Meteo hourly: missing or malformed times") from None
-    if any(b - a != timedelta(hours=1) for a, b in zip(times, times[1:], strict=False)):
+    if any(b - a != timedelta(hours=1) for a, b in itertools.pairwise(times)):
         raise WeatherError("Open-Meteo hourly: timestamps must be consecutive hours")
     if bad := [k for k in HOURLY if not isinstance(hourly.get(k), list) or len(hourly[k]) != len(times)]:
         raise WeatherError(f"Open-Meteo hourly: mismatched columns {bad}")

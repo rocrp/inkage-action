@@ -1,6 +1,7 @@
 """CAMS model air-quality forecast via keyless Open-Meteo; explicit U.S. AQI."""
 
 import asyncio
+import itertools
 import math
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -95,7 +96,7 @@ def parse_air_quality(raw: dict[str, Any], now: datetime) -> dict[str, Any]:
         raise AirQualityError(f"Open-Meteo air quality: forecast time {observed.isoformat()} is stale or in the future")
     if not isinstance(values, list) or len(values) != len(times):
         raise AirQualityError("Open-Meteo air quality: mismatched hourly time/us_aqi columns")
-    if any(b - a != timedelta(hours=1) for a, b in zip(times, times[1:], strict=False)):
+    if any(b - a != timedelta(hours=1) for a, b in itertools.pairwise(times)):
         raise AirQualityError("Open-Meteo air quality: timestamps must be consecutive hours")
     upcoming = [i for i, t in enumerate(times) if t > now][:HOURS]
     if len(upcoming) != HOURS:

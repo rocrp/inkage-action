@@ -90,7 +90,7 @@ def test_ycbcr_distance_prefers_luma_match():
     # YCbCr (BT.601, chroma weight 0.5): chroma differences to black and white are identical
     # (Cb -74.20, Cr -93.79), luma differs: to black Y=131.49, to white Y=-123.51 -> white.
     px = Image.new("RGB", (1, 1), (0, 224, 0))
-    bwr = BW + ((255, 0, 0),)
+    bwr = (*BW, (255, 0, 0))
     assert dither(px, bwr, Dither("threshold")).item() == 0
     assert dither(px, bwr, Dither("threshold", distance="ycbcr")).item() == 1
 
