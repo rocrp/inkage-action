@@ -2,7 +2,7 @@
 
 import io
 import json
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -52,14 +52,12 @@ class Photo(Source):
     sizes = tuple(sorted({p.size for p in PRESETS.values()}))
     schedule = Schedule.parse({"at": ["00:10"]})
     dither = "atkinson"
-    params = {"url": ""}
+    params: ClassVar[dict[str, Any]] = {"url": ""}
     fields = ("image", "url", "source")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:
-        if url := ctx.params["url"]:
-            meta = {"url": url, "title": "", "source": url}
-        else:
-            meta = parse_bing(await fetch_bytes(BING_API))
+        url = ctx.params["url"]
+        meta = {"url": url, "title": "", "source": url} if url else parse_bing(await fetch_bytes(BING_API))
         raw = await fetch_bytes(meta["url"])
         decode_image(raw, meta["url"])
         return {**meta, "image": raw}

@@ -8,7 +8,7 @@ do not (``SOLUSD``). Per pair: ``c[0]`` last trade, ``o`` open since 00:00 UTC,
 and reports no quote time, so there is no staleness check.
 """
 
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -75,7 +75,7 @@ def parse_ticker(body: dict[str, Any], symbols: list[str], quote: str) -> list[d
 class Crypto(Source):
     schedule = Schedule.parse({"every": "5m"})
     dither = "threshold"
-    params = {"symbols": ["BTC", "ETH", "SOL"], "quote": "USD"}
+    params: ClassVar[dict[str, Any]] = {"symbols": ["BTC", "ETH", "SOL"], "quote": "USD"}
     fields = ("quote", "coins")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

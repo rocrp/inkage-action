@@ -6,7 +6,7 @@ answers 0..28 over one synodic month (0 new, 7 first quarter, 14 full, 21 last q
 
 import math
 from datetime import date
-from typing import Any
+from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
 from astral import Observer, moon
@@ -32,7 +32,7 @@ PHASE_NAMES = (
 class Astro(Source):
     schedule = Schedule.parse({"at": ["00:05"]})
     dither = "threshold"
-    params = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai"}
+    params: ClassVar[dict[str, Any]] = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai"}
     fields = ("label", "date", "dawn", "sunrise", "noon", "sunset", "dusk", "day_length", "moon_phase")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

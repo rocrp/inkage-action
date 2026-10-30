@@ -8,7 +8,7 @@ with one entry per ECB business day; the last entry is the latest rate.
 
 import math
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -28,7 +28,7 @@ class FxError(RuntimeError):
 class Fx(Source):
     schedule = Schedule.parse({"every": "6h"})
     dither = "threshold"
-    params = {"base": "USD", "symbols": ["CNY", "EUR", "JPY", "GBP"]}
+    params: ClassVar[dict[str, Any]] = {"base": "USD", "symbols": ["CNY", "EUR", "JPY", "GBP"]}
     fields = ("base", "date", "prev_date", "rates")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

@@ -4,7 +4,7 @@ import asyncio
 import itertools
 import math
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 from loguru import logger
@@ -24,7 +24,7 @@ class AirQualityError(RuntimeError):
 class AirQuality(Source):
     schedule = Schedule.parse({"every": "1h"})
     dither = "threshold"
-    params = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai"}
+    params: ClassVar[dict[str, Any]] = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai"}
     fields = ("label", "aqi", "status", "pm25", "pm10", "updated", "hours")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

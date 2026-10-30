@@ -1,5 +1,7 @@
 """China market indices (CSI 300 by default) during Shanghai trading hours. Up = red, per Chinese convention."""
 
+from typing import Any, ClassVar
+
 from inkage.quotes import QuoteSource
 from inkage.schedule import Schedule
 
@@ -11,7 +13,7 @@ class Index(QuoteSource):
     # symbols: Tencent codes, exchange prefix included (sh000300 = CSI 300, sh000001 = SSE Composite);
     #   several make a watchlist. label: renames a lone symbol, ignored for several.
     # max_age_hours: older quotes raise; long enough to span Golden Week.
-    params = {"symbols": ["sh000300"], "label": "", "max_age_hours": 240}
+    params: ClassVar[dict[str, Any]] = {"symbols": ["sh000300"], "label": "", "max_age_hours": 240}
     prev_label = "昨收"
     up_inks = ("red",)
     down_inks = ("green",)

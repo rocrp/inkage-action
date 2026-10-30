@@ -10,7 +10,7 @@ release, which is not an error.
 import asyncio
 import os
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -70,7 +70,7 @@ def summarize(
 class GitHub(Source):
     schedule = Schedule.parse({"every": "30m"})
     dither = "threshold"
-    params = {"repo": "rocrp/inkage-action"}
+    params: ClassVar[dict[str, Any]] = {"repo": "rocrp/inkage-action"}
     fields = ("repo", "stars", "pushed_at", "commit_message")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

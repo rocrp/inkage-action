@@ -7,7 +7,7 @@ including for pinned works. API: https://metmuseum.github.io/
 
 import base64
 import io
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 from PIL import Image, UnidentifiedImageError
@@ -75,7 +75,7 @@ def validated_image(raw: bytes) -> str:
 class Art(Source):
     schedule = Schedule.parse({"at": ["00:10"]})
     dither = "atkinson"
-    params = {"artwork_id": 0}
+    params: ClassVar[dict[str, Any]] = {"artwork_id": 0}
     fields = ("title", "artist", "date", "credit", "source", "image")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

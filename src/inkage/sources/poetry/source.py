@@ -7,7 +7,7 @@ retries and every Panel show the same complete poem. No generated translations.
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from inkage.schedule import Schedule
 from inkage.source import Context, Source
@@ -18,7 +18,7 @@ POEMS = json.loads(Path(__file__).with_name("poems.json").read_text(encoding="ut
 class Poetry(Source):
     schedule = Schedule.parse({"at": ["00:10"]})
     dither = "threshold"
-    params = {"language": "mixed"}
+    params: ClassVar[dict[str, Any]] = {"language": "mixed"}
     fields = ("title", "author", "lines", "language", "source", "edition", "source_label")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

@@ -9,7 +9,7 @@ A dead or deleted item (``null``, ``dead``/``deleted`` set) is skipped. Any othe
 import asyncio
 import calendar
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import urlsplit
 
 import feedparser
@@ -95,7 +95,7 @@ def feed_items(content: bytes, count: int, ctx: Context) -> tuple[str, list[dict
 class News(Source):
     schedule = Schedule.parse({"every": "30m"})
     dither = "threshold"
-    params = {"feed": "hn", "count": 8, "label": ""}
+    params: ClassVar[dict[str, Any]] = {"feed": "hn", "count": 8, "label": ""}
     fields = ("label", "items")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

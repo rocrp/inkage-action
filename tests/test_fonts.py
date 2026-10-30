@@ -11,7 +11,7 @@ from inkage.render import Renderer
 
 def test_missing_bundled_font_fails_before_browser_launch(tmp_path, monkeypatch):
     monkeypatch.setattr(inkage.fonts, "FONT_DIR", tmp_path)
-    with pytest.raises(FileNotFoundError, match="bundled font missing:.*reinstall inkage"):
+    with pytest.raises(FileNotFoundError, match=r"bundled font missing:.*reinstall inkage"):
         Renderer()
 
 

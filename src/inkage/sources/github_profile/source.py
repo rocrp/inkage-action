@@ -12,7 +12,7 @@ import base64
 import io
 import re
 from datetime import UTC, timedelta
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import urlparse
 
 import httpx
@@ -66,7 +66,7 @@ def profile_data(raw: Any, username: str) -> dict[str, Any]:
 class GitHubProfile(Source):
     schedule = Schedule.parse({"every": "6h"})
     dither = "threshold"
-    params = {"username": "RoCry", "layout": "profile"}
+    params: ClassVar[dict[str, Any]] = {"username": "RoCry", "layout": "profile"}
     fields = ("username", "avatar", "calendar")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

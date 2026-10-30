@@ -1,7 +1,7 @@
 """Public Statuspage summary: official rollup, components, unresolved incidents."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import urlsplit
 
 import httpx
@@ -75,7 +75,7 @@ def parse_summary(raw: dict, ctx: Context) -> dict:
 
 class Status(Source):
     schedule = Schedule.parse({"every": "15m"})
-    params = {"url": "https://www.githubstatus.com", "label": ""}
+    params: ClassVar[dict[str, Any]] = {"url": "https://www.githubstatus.com", "label": ""}
     fields = ("label", "headline", "checked")
 
     async def fetch(self, ctx: Context) -> dict:

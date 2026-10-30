@@ -86,7 +86,7 @@ def test_non_positive_price_raises(monkeypatch):
 
 def test_too_many_symbols_raises(monkeypatch):
     sc = source_config("800x480-bwr", symbols=["BTC", "ETH", "SOL", "XRP", "ADA", "DOGE", "DOT"])
-    with pytest.raises(ValueError, match="1..6"):
+    with pytest.raises(ValueError, match=r"1\.\.6"):
         fetched(monkeypatch, sc, TICKER)
 
 

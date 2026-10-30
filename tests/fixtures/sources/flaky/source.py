@@ -1,5 +1,7 @@
 """Fixture: fetch fails when the config says so."""
 
+from typing import Any, ClassVar
+
 from PIL import Image
 
 from inkage.schedule import Schedule
@@ -9,7 +11,7 @@ from inkage.source import Source
 class Flaky(Source):
     sizes = ((250, 122),)
     schedule = Schedule.parse({"every": "5m"})
-    params = {"fail": False}
+    params: ClassVar[dict[str, Any]] = {"fail": False}
     fields = ("value",)
 
     async def fetch(self, ctx):

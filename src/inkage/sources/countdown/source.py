@@ -1,7 +1,7 @@
 """Countdown: days until (or since) configured events; yearly events roll to their next occurrence."""
 
 from datetime import date
-from typing import Any
+from typing import Any, ClassVar
 
 from inkage.schedule import Schedule
 from inkage.source import Context, Source
@@ -65,7 +65,7 @@ def countdown(events: Any, today: date) -> list[dict[str, Any]]:
 class Countdown(Source):
     schedule = Schedule.parse({"at": ["00:05"]})
     dither = "threshold"
-    params = {"events": [{"title": "New Year", "date": "2027-01-01", "repeat": "yearly"}]}
+    params: ClassVar[dict[str, Any]] = {"events": [{"title": "New Year", "date": "2027-01-01", "repeat": "yearly"}]}
     fields = ("events",)
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

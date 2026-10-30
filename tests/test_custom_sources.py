@@ -48,7 +48,7 @@ def test_python_source_custom_fetch(tmp_path):
 
 
 def test_custom_source_named_like_builtin_rejected():
-    with pytest.raises(ConfigError, match="'calendar'.*collides"):
+    with pytest.raises(ConfigError, match=r"'calendar'.*collides"):
         parse_config({"sources": {"calendar": {"panels": ["250x122-bw"]}}}, sources_dir=FIXTURES / "collide")
 
 

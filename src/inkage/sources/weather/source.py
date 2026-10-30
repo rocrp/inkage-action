@@ -7,7 +7,7 @@ in the location's local zone (``utc_offset_seconds`` beside them).
 import itertools
 import math
 from datetime import date, datetime, timedelta, timezone
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -64,7 +64,13 @@ class WeatherError(RuntimeError):
 class Weather(Source):
     schedule = Schedule.parse({"every": "30m"})
     dither = "threshold"
-    params = {"latitude": 31.2304, "longitude": 121.4737, "label": "Shanghai", "units": "celsius", "layout": "daily"}
+    params: ClassVar[dict[str, Any]] = {
+        "latitude": 31.2304,
+        "longitude": 121.4737,
+        "label": "Shanghai",
+        "units": "celsius",
+        "layout": "daily",
+    }
     fields = ("label", "condition", "temp", "humidity", "wind", "updated", "days")
 
     async def fetch(self, ctx: Context) -> dict[str, Any]:

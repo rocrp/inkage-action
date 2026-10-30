@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 import httpx
 
@@ -73,7 +73,7 @@ def parse_runs(raw: dict, ctx: Context) -> dict:
 
 class GitHubCI(Source):
     schedule = Schedule.parse({"every": "15m"})
-    params = {"repo": "rocrp/inkage-action", "branch": "", "count": 5}
+    params: ClassVar[dict[str, Any]] = {"repo": "rocrp/inkage-action", "branch": "", "count": 5}
     fields = ("repo", "checked")
 
     async def fetch(self, ctx: Context) -> dict:

@@ -88,7 +88,7 @@ def test_missing_rate_raises(monkeypatch, damage, symbols, match):
 
 
 def test_too_many_symbols_raise(monkeypatch):
-    with pytest.raises(RuntimeError, match="1..6 currency codes"):
+    with pytest.raises(RuntimeError, match=r"1\.\.6 currency codes"):
         fetched(monkeypatch, source_config(symbols=["CNY", "EUR", "JPY", "GBP", "CHF", "AUD", "CAD"]), capture())
 
 
