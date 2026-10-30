@@ -166,14 +166,14 @@ async def run(
             mine = [d for d in due if d.source is sc]
             try:
                 data = src.check_data(await src.fetch(ctx))
-            except Exception as e:  # noqa: BLE001 - one Source's runtime failure must not stop the Run
+            except Exception as e:
                 for d in mine:
                     fail(sc, d, _describe(e))
                 continue
             for d in mine:
                 try:
                     frame = await frame_from_data(renderer, src, ctx, d.panel, sc, data)
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     fail(sc, d, _describe(e))
                     continue
                 entries[(sc.id, d.panel.id)] = _write_frame(files, frame, sc, d, now)

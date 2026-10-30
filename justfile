@@ -9,12 +9,12 @@ setup:
     uv run playwright install chromium
 
 fmt:
-    uv run ruff format src tests
-    uv run ruff check --fix src tests
+    uvx ruff format src tests
+    uvx ruff check --fix src tests
 
 lint:
-    uv run ruff format --check src tests
-    uv run ruff check src tests
+    uvx ruff format --check src tests
+    uvx ruff check src tests
     uv run pyright
 
 test *args:
