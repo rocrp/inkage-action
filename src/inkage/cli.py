@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -44,7 +44,7 @@ def _now(text: str | None) -> datetime:
 
 
 @contextmanager
-def _config_errors() -> Iterator[None]:
+def _config_errors() -> Generator[None]:
     """Config errors exit 2 with the message naming the offending key."""
     try:
         yield

@@ -15,12 +15,16 @@ fmt:
 lint:
     uvx ruff format --check src tests
     uvx ruff check src tests
-    uv run pyright
+    uv run ty check
 
 test *args:
     uv run pytest -q {{args}}
 
 check: lint test
+
+# Build source and wheel distributions
+build:
+    uv build
 
 # Validate a config and print the resolved plan
 validate config="inkage.toml":

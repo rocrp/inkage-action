@@ -4,7 +4,7 @@ import asyncio
 import itertools
 import math
 from datetime import datetime, timedelta, timezone
-from typing import Any, ClassVar
+from typing import Any, ClassVar, NotRequired, TypedDict
 
 import httpx
 from loguru import logger
@@ -15,6 +15,12 @@ from inkage.source import Context, Source
 URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 MAX_AGE = timedelta(hours=3)
 HOURS = 12
+
+
+class ForecastHour(TypedDict):
+    time: str
+    aqi: int
+    height: NotRequired[int]
 
 
 class AirQualityError(RuntimeError):
@@ -102,7 +108,7 @@ def parse_air_quality(raw: dict[str, Any], now: datetime) -> dict[str, Any]:
     if len(upcoming) != HOURS:
         raise AirQualityError(f"Open-Meteo air quality: fewer than {HOURS} upcoming hours")
     aqi = math.floor(number(current, "us_aqi", "current") + 0.5)
-    hours = [
+    hours: list[ForecastHour] = [
         {
             "time": times[i].strftime("%H"),
             "aqi": math.floor(number({"us_aqi": values[i]}, "us_aqi", f"hourly[{i}]") + 0.5),
