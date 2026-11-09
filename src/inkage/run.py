@@ -120,10 +120,12 @@ async def run(
 
     def carry(entry: Entry) -> bool:
         """Copy a previous Frame's files unchanged; False if any is missing."""
-        got = {path: get(path) for path in _files(entry)}
-        if any(v is None for v in got.values()):
-            return False
-        files.update(got)  # type: ignore[arg-type]
+        got: dict[str, bytes] = {}
+        for path in _files(entry):
+            if (data := get(path)) is None:
+                return False
+            got[path] = data
+        files.update(got)
         return True
 
     errors: dict[tuple[str, str], str] = {}

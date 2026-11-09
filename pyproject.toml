@@ -28,12 +28,14 @@ requires = ["uv_build>=0.12.4,<0.13.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = ["fonttools>=4.66.1", "pyright>=1.1.414", "pytest>=9.1.1"]
+dev = [
+    "fonttools>=4.66.1",
+    "pytest>=9.1.1",
+    "ty>=0.0.99",
+]
 
 [tool.ruff]
 extend = "~/.ruff.toml"
-
-[tool.ruff.lint]
 
 [tool.ruff.lint.isort]
 known-first-party = ["inkage"]
@@ -42,6 +44,5 @@ known-first-party = ["inkage"]
 testpaths = ["tests"]
 filterwarnings = ["error::DeprecationWarning:inkage.*"]
 
-[tool.pyright]
+[tool.ty.src]
 include = ["src"]
-pythonVersion = "3.13"

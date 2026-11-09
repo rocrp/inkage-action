@@ -162,6 +162,14 @@ uv run inkage convert photo.jpg --panel 800x480-spectra6 --dither atkinson
 uv run inkage render calendar --panel 800x480-bwr
 uv run inkage run --site-url https://rocrp.github.io/inkage-action/ --out dist
 just check                                   # lint, types, tests
+just build                                   # source distribution + wheel
+```
+
+CI uses the same checks and builds both distributions. Set the repository variable `RUFF_CONFIG` to the shared
+`~/.ruff.toml` contents; the workflow installs it on the runner and fails explicitly when it is missing:
+
+```sh
+gh variable set RUFF_CONFIG --repo OWNER/REPO < ~/.ruff.toml
 ```
 
 ## Credits

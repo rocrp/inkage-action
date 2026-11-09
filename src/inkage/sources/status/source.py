@@ -1,7 +1,7 @@
 """Public Statuspage summary: official rollup, components, unresolved incidents."""
 
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypedDict
 from urllib.parse import urlsplit
 
 import httpx
@@ -17,6 +17,12 @@ STATES = {
     "partial_outage": (3, "Partial outage"),
     "major_outage": (4, "Major outage"),
 }
+
+
+class Component(TypedDict):
+    name: str
+    state: str
+    severity: int
 
 
 class StatusError(RuntimeError):
@@ -43,7 +49,7 @@ def parse_summary(raw: dict, ctx: Context) -> dict:
         components, incidents = raw["components"], raw["incidents"]
         if not isinstance(components, list) or not isinstance(incidents, list):
             raise StatusError("status: components and incidents must be lists")
-        rows = []
+        rows: list[Component] = []
         for component in components:
             label = text(component["name"], "component.name")
             state = component["status"]
