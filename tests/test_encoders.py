@@ -1,10 +1,15 @@
 """pcim byte layout against hand-computed bytes."""
 
+import io
+
 import numpy as np
 import pytest
 from PIL import Image
 
+from inkage.dither import Dither
 from inkage.encoders import encode_pcim
+from inkage.frame import make_frame, png_bytes
+from inkage.panel import PRESETS
 
 
 def indexed(rows: list[list[int]], n: int) -> Image.Image:
@@ -33,10 +38,16 @@ def test_3x2_hand_computed_bytes():
 
 
 def test_800x480_spectra6_size():
-    frame = indexed(np.random.default_rng(1).integers(0, 6, (480, 800)).tolist(), 6)
-    assert len(encode_pcim(frame, 6)) == 16 + 192_000
+    rng = np.random.default_rng(1)
+    rgb = Image.fromarray(rng.integers(0, 256, (480, 800, 3), dtype=np.uint8), mode="RGB")
+    raw_png = png_bytes(make_frame(rgb, PRESETS["800x480-spectra6"], Dither("threshold")))
+    reloaded = Image.open(io.BytesIO(raw_png))
+    assert len(encode_pcim(reloaded, 6)) == 16 + 192_000
+    assert png_bytes(reloaded) == raw_png
 
 
 def test_index_beyond_ink_count_fails():
     with pytest.raises(ValueError, match="exceeds ink count"):
-        encode_pcim(indexed([[0, 3]], 4), 3)
+        encode_pcim(indexed([[0, 3]], 3), 3)
+    with pytest.raises(ValueError, match="exceeds ink count"):
+        encode_pcim(indexed([[0, 0]], 4), 3)

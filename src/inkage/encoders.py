@@ -23,6 +23,8 @@ def encode_pcim(frame: Image.Image, ink_count: int) -> bytes:
         raise ValueError(f"pcim: frame must be mode P, got {frame.mode}")
     if not 0 < ink_count <= 16:
         raise ValueError(f"pcim: ink count must be 1..16, got {ink_count}")
+    if (pal := frame.getpalette()) is not None and len(pal) > 3 * ink_count:
+        raise ValueError(f"pcim: palette count {len(pal) // 3} exceeds ink count {ink_count}")
     px = np.asarray(frame, dtype=np.uint8)
     if (top := int(px.max())) >= ink_count:
         raise ValueError(f"pcim: pixel index {top} exceeds ink count {ink_count}")
