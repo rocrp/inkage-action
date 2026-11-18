@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import os
 from dataclasses import dataclass, field, replace
 from datetime import datetime
@@ -72,7 +73,8 @@ def plan(config: Config, previous: Manifest | None, now: datetime) -> list[Decis
             due, reason = True, "encoders changed"
         basis = now if due else last
         assert basis is not None
-        decisions.append(Decision(sc, panel, due, reason, entry, sc.schedule.next_due(basis, sc.tz)))
+        after = None if due else now
+        decisions.append(Decision(sc, panel, due, reason, entry, sc.schedule.next_due(basis, sc.tz, after=after)))
     return decisions
 
 
@@ -140,7 +142,11 @@ async def run(
             files[sidecar_path(*old.key)] = sidecar_bytes(kept)
             continue
         if not d.due and d.previous and d.previous.sha256 and carry(d.previous):
-            entries[d.previous.key] = d.previous
+            kept = d.previous
+            if (nd := iso(d.next_due)) != kept.next_due:
+                kept = replace(kept, next_due=nd)
+                files[sidecar_path(*kept.key)] = sidecar_bytes(kept)
+            entries[kept.key] = kept
         else:
             if not d.due:
                 d.due, d.reason = True, "previous Frame unavailable"
@@ -215,7 +221,7 @@ def _write_frame(files: dict[str, bytes], frame: Image.Image, sc: SourceConfig, 
     files[preview_path(s, p)] = png_bytes(preview(frame))
     encoders = {}
     for name in d.panel.encoders:
-        blob = ENCODERS[name].encode(frame, d.panel.ink_count)
+        blob = ENCODERS[name].encode(Image.open(io.BytesIO(png)), d.panel.ink_count)
         files[encoder_path(s, p, name)] = blob
         encoders[name] = {"url": encoder_path(s, p, name), "sha256": _sha(blob)}
     entry = Entry(

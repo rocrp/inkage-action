@@ -165,12 +165,16 @@ class Schedule:
         detail = f"{_fmt(elapsed)} elapsed of {_fmt(interval)}{' ' + where if where else ''}"
         return elapsed >= interval - TOLERANCE, detail
 
-    def next_due(self, last: datetime, tz: ZoneInfo) -> datetime | None:
-        """Earliest time after ``last`` at which the Frame becomes due (without tolerance)."""
+    def next_due(self, last: datetime, tz: ZoneInfo, after: datetime | None = None) -> datetime | None:
+        """Earliest time after ``last`` (and ``after``, when given) at which the Frame becomes due."""
+        floor = max(last, after) if after is not None else last
         if self.at:
-            return next(t for t in self._at_times(last, tz, 2) if t - TOLERANCE > last).astimezone(UTC)
-        t = last
-        while (t := t + timedelta(minutes=1)) <= last + HORIZON:
+            return next(
+                t for t in self._at_times(last, tz, (floor - last).days + 2) if t - TOLERANCE > last and t > floor
+            ).astimezone(UTC)
+        mins = max(0, int((floor - last).total_seconds() // 60))
+        t = last + timedelta(minutes=mins)
+        while (t := t + timedelta(minutes=1)) <= floor + HORIZON:
             if (interval := self._interval(t, tz)) is not None and t - last >= interval:
                 return t.astimezone(UTC)
         return None

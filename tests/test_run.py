@@ -292,3 +292,32 @@ def test_first_run_failure_has_retry_and_carries_without_a_png(tmp_path):
         None,
         None,
     )
+
+
+def test_carry_after_window_closes_advances_next_due_past_now(tmp_path):
+    # Captured failure (run 44175482180): generated in window at 14:50 Shanghai (next_due 14:55),
+    # next Run arrives after the 15:00 close at 15:02 -> carried over, next_due advances to 20:50 (6h fallback).
+    cfg = parse_config(
+        {
+            "defaults": {"timezone": "Asia/Shanghai"},
+            "sources": {
+                "clock": {
+                    "panels": ["250x122-bw"],
+                    "schedule": {"every": "5m", "window": {"time": "09:30-15:00", "days": "mon-fri"}, "fallback": "6h"},
+                }
+            },
+        },
+        sources_dir=FIXTURES,
+    )
+    a, b = tmp_path / "a", tmp_path / "b"
+    t_in = datetime(2026, 10, 12, 14, 50, tzinfo=SH)
+    t_after_close = datetime(2026, 10, 12, 15, 2, tzinfo=SH)
+    first = do_run(cfg, lambda _p: None, a, t_in).manifest.frames[0]
+    assert (first.generated_at, first.next_due) == ("2026-10-12T06:50:00Z", "2026-10-12T06:55:00Z")
+
+    second = do_run(cfg, site_getter(a), b, t_after_close)
+    assert not second.decisions[0].due
+    entry = second.manifest.frames[0]
+    assert (entry.generated_at, entry.next_due) == ("2026-10-12T06:50:00Z", "2026-10-12T12:50:00Z")
+    assert (b / "clock/250x122-bw.png").read_bytes() == (a / "clock/250x122-bw.png").read_bytes()
+    assert json.loads((b / "clock/250x122-bw.json").read_bytes())["next_due"] == "2026-10-12T12:50:00Z"

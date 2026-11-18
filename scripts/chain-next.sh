@@ -21,4 +21,13 @@ echo "next_due=${next_due:-none}; sleeping ${wait}s before dispatching the next 
 sleep "$wait"
 
 wf="${GITHUB_WORKFLOW_REF#*/.github/workflows/}"
-gh workflow run "${wf%@*}" -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
+target="${wf%@*}"
+delays=(${RETRY_DELAYS:-5 15})
+for ((i = 0; ; i++)); do
+  if gh workflow run "$target" -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"; then
+    exit 0
+  fi
+  (( i < ${#delays[@]} )) || exit 1
+  echo "dispatch failed; retrying in ${delays[i]}s" >&2
+  sleep "${delays[i]}"
+done

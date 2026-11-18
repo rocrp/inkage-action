@@ -57,3 +57,37 @@ def test_chain_output_selects_next_attempt_without_rewriting_freshness(tmp_path,
         text=True,
     )
     assert output.read_text().splitlines() == [f"dist={tmp_path}", "failed=true", f"next_due={expected}"]
+
+
+@pytest.mark.parametrize(("fail_times", "expected_code", "expected_calls"), [(2, 0, 3), (3, 1, 3)])
+def test_chain_next_retries_transient_dispatch_errors(tmp_path, fail_times, expected_code, expected_calls):
+    # Captured from production run 44240630436: POST .../dispatches returned HTTP 500.
+    calls = tmp_path / "calls"
+    stub = tmp_path / "gh"
+    stub.write_text(
+        f'#!/usr/bin/env bash\nn=$(cat "{calls}" 2>/dev/null || echo 0)\n'
+        f'n=$((n + 1))\necho "$n" > "{calls}"\n'
+        f'(( n <= {fail_times} )) && {{ echo "HTTP 500" >&2; exit 1; }}\n'
+        'echo "$*"\n'
+    )
+    stub.chmod(0o755)
+    env = {
+        **os.environ,
+        "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        "GITHUB_TOKEN": "tok",
+        "GITHUB_REPOSITORY": "rocrp/inkage-action",
+        "GITHUB_WORKFLOW_REF": "rocrp/inkage-action/.github/workflows/inkage.yml@refs/heads/main",
+        "GITHUB_REF_NAME": "main",
+        "MAX_SLEEP_SECONDS": "0",
+        "RETRY_DELAYS": "0 0",
+    }
+    res = subprocess.run(
+        ["bash", str(ROOT / "scripts/chain-next.sh"), ""],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert res.returncode == expected_code
+    assert int(calls.read_text().strip()) == expected_calls
+    if expected_code == 0:
+        assert "workflow run inkage.yml -R rocrp/inkage-action --ref main" in res.stdout

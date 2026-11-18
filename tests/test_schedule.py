@@ -97,6 +97,12 @@ def test_next_due_is_due_and_earlier_is_not():
     assert not MARKET.is_due(nd - timedelta(minutes=5), last, SH)[0]
 
 
+def test_next_due_after_window_closed_skips_past_in_window_slot():
+    # Captured from production run 44175482180: stock generated at 15:17:35 EST (20:17:35Z),
+    # next evaluated after the 16:00 EST close at 16:02:14 EST (21:02:14Z) -> 12h fallback at 08:17:35Z.
+    assert NYSE.next_due(utc("2026-11-17 20:17:35"), NY, after=utc("2026-11-17 21:02:14")) == utc("2026-11-18 08:17:35")
+
+
 def test_window_days_must_be_text():
     raw = {
         "sources": {
